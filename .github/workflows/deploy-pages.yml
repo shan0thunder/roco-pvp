@@ -31,7 +31,7 @@ jobs:
           cp -r frontend/* _site/
           mkdir -p _site/data
           cp -r data/product _site/data/
-          cp -r data/images _site/data/
+          # cp -r data/images _site/data/
           cp data/type_chart.json _site/data/ 2>/dev/null || true
           cp data/skill_index.json _site/data/ 2>/dev/null || true
       - name: Upload artifact
