@@ -5,7 +5,6 @@ __pycache__/
 
 # 大文件
 data/pets.json
-data/images/
 data/backup/
 data/skills.json
 data/biliwiki_pets.json
