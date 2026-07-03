@@ -3,10 +3,9 @@ __pycache__/
 *.pyc
 *.pyo
 
-# 大文件
+# 大文件（不包含图片，线上需要）
 data/pets.json
 data/product/product_data.json
-data/images/
 data/backup/
 data/skill_index.json
 data/skills.json

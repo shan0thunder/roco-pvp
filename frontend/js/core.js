@@ -20,14 +20,14 @@ const DataStore = {
   },
   async _doLoad() {
     try {
-      const resp = await fetch('/data/product/product_data.json');
+      const resp = await fetch('data/product/product_data.json');
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       this._data = await resp.json();
       return this._data;
     } catch (e) {
       console.warn('product_data.json 加载失败，尝试备用路径', e);
       try {
-        const resp = await fetch('/data/product/product_data.json');
+        const resp = await fetch('data/product/product_data.json');
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
         this._data = await resp.json();
         return this._data;
@@ -42,7 +42,7 @@ const DataStore = {
   /** 异步加载技能索引 */
   async loadSkillIndex() {
     try {
-      const resp = await fetch('/data/skill_index.json');
+      const resp = await fetch('data/skill_index.json');
       if (resp.ok) return await resp.json();
     } catch (_) { /* ignore */ }
     return null;
