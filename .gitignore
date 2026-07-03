@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# 大文件
+data/pets.json
+data/product/product_data.json
+data/images/
+data/backup/
+data/skill_index.json
+data/skills.json
+data/biliwiki_pets.json
+data/rendered_*.json
+data/type_chart.json
+data/.scraper_checkpoint.json
+data/pvp_teams.json
+frontend/app.old.js
+data/calc_*.py
+
+# 日志
+server_output.log
+full_scrape.log
+*.stackdump
+
+# 临时/备份
+data/temp/
+data/backup/
+data/wgj_extract.txt
+data/all_data.json
+
+# 编辑器临时文件
+data/fix_*.py
+
+# IDE & AI
+.agents/
+.claude/
+.idea/
+*.swp
+*.swo
+
+# 系统
+.DS_Store
+Thumbs.db

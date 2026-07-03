@@ -1,0 +1,47 @@
+/* ============================================
+   深色模式 — CSS变量覆盖
+   通过 [data-theme="dark"] 切换
+   ============================================ */
+
+[data-theme="dark"] {
+  --primary-50:  #2e2615;
+  --primary-500: #fbbf24;
+  --primary-600: #f59e0b;
+  --primary-700: #d97706;
+
+  --accent-50:  #0a2e33;
+  --accent-500: #22d3ee;
+  --accent-600: #06b6d4;
+
+  --neutral-50:  #1c1917;
+  --neutral-100: #292524;
+  --neutral-200: #44403c;
+  --neutral-500: #a8a29e;
+  --neutral-800: #e7e5e4;
+  --neutral-900: #fafaf9;
+
+  --white: #292524;
+
+  --danger-500:  #f87171;
+  --danger-50:   #2d1b1b;
+  --success-500: #4ade80;
+  --success-50:  #1a2e1a;
+  --warning-500: #fbbf24;
+  --warning-50:  #2e2615;
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+  --shadow-lg: 0 4px 24px rgba(0,0,0,0.5);
+}
+
+/* 深色模式额外调整 */
+[data-theme="dark"] .slot.empty { background: var(--neutral-100); }
+[data-theme="dark"] .type-chart-table th { background: var(--neutral-100); }
+[data-theme="dark"] .type-label { background: var(--neutral-50); }
+[data-theme="dark"] .type-chart-table td.type-label { background: var(--neutral-50); }
+[data-theme="dark"] .type-cell-0 { background: var(--neutral-900); }
+[data-theme="dark"] .team-rank.T0 { background: #a67c00; }
+[data-theme="dark"] .team-rank.T1 { background: #6b7280; }
+[data-theme="dark"] .card-tag:not([style*="background"]) { background: var(--accent-50); color: var(--accent-500); }
+[data-theme="dark"] .modal-overlay { background: rgba(0,0,0,0.6); }
+[data-theme="dark"] .info-icon::after { background: var(--neutral-900); }
