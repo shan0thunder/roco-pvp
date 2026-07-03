@@ -59,6 +59,63 @@ const DataStore = {
 };
 
 // ============================================================
+// Supabase 客户端
+// ============================================================
+const SupabaseDB = (() => {
+  const supabaseUrl = 'https://nxphzmikyatvtebazspt.supabase.co';
+  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im54cGh6bWlreWF0dnRlYmF6c3B0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwNjE3MzksImV4cCI6MjA5ODYzNzczOX0.Uep50Y0KklvUKJ8q3OpnGKgYhhC8RlWhokg463EJLoY';
+  let client = null;
+
+  function getClient() {
+    if (!client && typeof supabase !== 'undefined') {
+      client = supabase.createClient(supabaseUrl, supabaseKey);
+    }
+    return client;
+  }
+
+  /** 获取所有分享阵容 */
+  async function getTeams(sortBy = 'created_at', ascending = false) {
+    const c = getClient();
+    if (!c) return [];
+    const { data } = await c.from('shared_teams')
+      .select('*')
+      .order(sortBy, { ascending })
+      .limit(100);
+    return data || [];
+  }
+
+  /** 发布阵容 */
+  async function publishTeam(entry) {
+    const c = getClient();
+    if (!c) return null;
+    const { data } = await c.from('shared_teams').insert(entry).select();
+    return data?.[0] || null;
+  }
+
+  /** 点击计数 */
+  async function clickTeam(id) {
+    const c = getClient();
+    if (!c) return;
+    const { data: current } = await c.from('shared_teams').select('click_count').eq('id', id).single();
+    const newCount = (current?.click_count || 0) + 1;
+    await c.from('shared_teams').update({ click_count: newCount }).eq('id', id);
+  }
+
+  /** 按精灵名搜索 */
+  async function searchTeams(keyword) {
+    const c = getClient();
+    if (!c) return [];
+    const { data } = await c.from('shared_teams')
+      .select('*')
+      .contains('pet_names', [keyword])
+      .limit(100);
+    return data || [];
+  }
+
+  return { getTeams, publishTeam, clickTeam, searchTeams };
+})();
+
+// ============================================================
 // 工具函数
 // ============================================================
 const Utils = {

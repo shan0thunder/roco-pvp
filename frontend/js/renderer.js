@@ -731,8 +731,17 @@ const Renderer = {
   // ==========================================================
   async _renderSharePage() {
     const data = await DataStore.load();
-    const allTeams = this._getSharedTeams();
+    const petMap = {};
+    for (const p of DataStore.pets) petMap[p.name] = p;
 
+    const kw = (this._shareFilter || '').toLowerCase();
+    const sortField = this._shareSortBy === 'click' ? 'click_count'
+      : this._shareSortBy === 'cover' ? 'attack_count'
+      : this._shareSortBy === 'resist' ? 'defense_count'
+      : 'created_at';
+    const asc = this._shareSortBy === 'old';
+
+    const allTeams = await this._getSharedTeams(sortField);
     if (!allTeams.length) {
       this._container.innerHTML =
         '<div class="page-header"><h2>阵容分享</h2><p>去精灵图鉴配好队后分享你的阵容</p></div>'
@@ -741,80 +750,57 @@ const Renderer = {
       return;
     }
 
-    const kw = (this._shareFilter || '').toLowerCase();
-    const sortBy = this._shareSortBy || 'new';
-
-    // 筛选
+    // 前端筛选
     let filtered = allTeams;
     if (kw) {
       filtered = filtered.filter(t =>
-        t.petNames.some(n => n.includes(kw)) ||
+        (t.pet_names||[]).some(n => n.includes(kw)) ||
         (t.elements||[]).some(e => e.includes(kw)) ||
         (t.description||'').includes(kw)
       );
     }
 
-    // 排序
-    const sortFns = {
-      'new': (a, b) => b.id - a.id,
-      'old': (a, b) => a.id - b.id,
-      'click': (a, b) => (b.clickCount||0) - (a.clickCount||0),
-      'cover': (a, b) => (b.attackCount||0) - (a.attackCount||0),
-      'resist': (a, b) => (b.defenseCount||0) - (a.defenseCount||0),
-    };
-    filtered.sort(sortFns[sortBy] || sortFns['new']);
-
-    const petMap = {};
-    for (const p of DataStore.pets) petMap[p.name] = p;
-
     let html = '<div class="page-header"><h2>阵容分享</h2><p>查看玩家分享的PVP阵容，找到适合你的队伍</p></div>';
 
-    // 搜索+排序栏
     html += '<div class="share-toolbar" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center">'
       + '<input type="text" placeholder="搜索精灵名..." value="'+Utils.esc(this._shareFilter||'')+'" style="flex:1;min-width:160px;padding:8px 14px;border:1px solid var(--neutral-200);border-radius:var(--radius);font-size:14px;outline:none" oninput="Renderer._shareFilter=this.value;Renderer._renderCurrentView()">'
       + '<select class="filter-select" onchange="Renderer._shareSortBy=this.value;Renderer._renderCurrentView()">'
-      + '<option value="new"'+(sortBy==='new'?' selected':'')+'>最新</option>'
-      + '<option value="old"'+(sortBy==='old'?' selected':'')+'>最早</option>'
-      + '<option value="click"'+(sortBy==='click'?' selected':'')+'>最热(点击)</option>'
-      + '<option value="cover"'+(sortBy==='cover'?' selected':'')+'>打击面最多</option>'
-      + '<option value="resist"'+(sortBy==='resist'?' selected':'')+'>抵抗面最多</option>'
+      + '<option value="new"'+(this._shareSortBy==='new'?' selected':'')+'>最新</option>'
+      + '<option value="old"'+(this._shareSortBy==='old'?' selected':'')+'>最早</option>'
+      + '<option value="click"'+(this._shareSortBy==='click'?' selected':'')+'>最热(点击)</option>'
+      + '<option value="cover"'+(this._shareSortBy==='cover'?' selected':'')+'>打击面最多</option>'
+      + '<option value="resist"'+(this._shareSortBy==='resist'?' selected':'')+'>抵抗面最多</option>'
       + '</select>'
       + '<span style="font-size:13px;color:var(--neutral-500)">共 '+filtered.length+' 套</span>'
       + '</div>';
 
-    // 阵容卡片
     html += '<div class="share-grid">';
     for (const entry of filtered) {
-      const pets = entry.petNames.map(n => petMap[n]).filter(Boolean);
-      const coverPct = entry.totalElements ? Math.round((entry.attackCount||0) / entry.totalElements * 100) : 0;
-      const resistPct = entry.totalElements ? Math.round((entry.defenseCount||0) / entry.totalElements * 100) : 0;
-      const timeAgo = this._timeAgo(entry.createdAt);
+      const pets = (entry.pet_names||[]).map(n => petMap[n]).filter(Boolean);
+      const coverPct = entry.total_elements ? Math.round((entry.attack_count||0) / entry.total_elements * 100) : 0;
+      const resistPct = entry.total_elements ? Math.round((entry.defense_count||0) / entry.total_elements * 100) : 0;
+      const timeAgo = this._timeAgo(entry.created_at);
 
       html += '<div class="share-card" onclick="Renderer._clickSharedTeam('+entry.id+')">'
-        + '<div class="share-card-header">'
-        + '<div class="share-pet-row">';
+        + '<div class="share-card-header"><div class="share-pet-row">';
       for (const p of pets) {
         html += '<div class="share-pet-mini" title="'+Utils.esc(p?.name||'')+'">'
           + (p?.image ? '<img src="'+Utils.esc(p.image)+'" alt="">' : '<span class="share-pet-initial">'+Utils.esc((p?.name||'?')[0])+'</span>')
           + '<span>'+Utils.truncate(p?.name||'',4)+'</span>'
           + '</div>';
       }
-      html += '</div>'
-        + '<div class="share-elems">'+(entry.elements||[]).map(e => '<span class="card-tag" style="background:'+Utils.elementColor(e)+';color:#fff">'+Utils.esc(e)+'</span>').join('')+'</div>'
-        + '</div>';
-
+      html += '</div><div class="share-elems">'
+        + (entry.elements||[]).map(e => '<span class="card-tag" style="background:'+Utils.elementColor(e)+';color:#fff">'+Utils.esc(e)+'</span>').join('')
+        + '</div></div>';
       if (entry.description) {
         html += '<div class="share-desc">'+Utils.esc(entry.description)+'</div>';
       }
-
       html += '<div class="share-stats">'
         + '<span class="share-stat" title="打击面覆盖">⚔ '+coverPct+'%</span>'
         + '<span class="share-stat" title="抵抗面覆盖">🛡 '+resistPct+'%</span>'
-        + '<span class="share-stat" title="查看次数">👁 '+(entry.clickCount||0)+'</span>'
+        + '<span class="share-stat" title="查看次数">👁 '+(entry.click_count||0)+'</span>'
         + '<span class="share-stat" title="分享时间">🕐 '+timeAgo+'</span>'
         + '</div>';
-
-      // 配招预览
       const hasSkills = Object.keys(entry.skills||{}).length > 0;
       if (hasSkills) {
         html += '<div class="share-skills-preview">';
@@ -827,14 +813,10 @@ const Renderer = {
         }
         html += '</div>';
       }
-
       html += '</div>';
     }
     html += '</div>';
-
-    if (!filtered.length) {
-      html += '<div class="empty-state">未找到匹配的阵容</div>';
-    }
+    if (!filtered.length) html += '<div class="empty-state">未找到匹配的阵容</div>';
 
     this._container.innerHTML = html;
   },
@@ -913,27 +895,21 @@ const Renderer = {
     });
   },
 
-  /** 点击阵容：记录+1 */
-  _clickSharedTeam(id) {
-    const teams = this._getSharedTeams();
-    const entry = teams.find(t => t.id === id);
-    if (entry) {
-      entry.clickCount = (entry.clickCount||0) + 1;
-      this._saveSharedTeams(teams);
-    }
-    // 展开详情弹窗
+  /** 点击阵容：记录+1（云端） */
+  async _clickSharedTeam(id) {
+    await SupabaseDB.clickTeam(id);
     this._showSharedTeamDetail(id);
   },
 
   /** 显示分享阵容详情弹窗 */
-  _showSharedTeamDetail(id) {
-    const teams = this._getSharedTeams();
+  async _showSharedTeamDetail(id) {
+    const teams = await this._getSharedTeams('created_at');
     const entry = teams.find(t => t.id === id);
     if (!entry) return;
 
     const petMap = {};
     for (const p of DataStore.pets) petMap[p.name] = p;
-    const pets = entry.petNames.map(n => petMap[n]).filter(Boolean);
+    const pets = (entry.pet_names||[]).map(n => petMap[n]).filter(Boolean);
 
     // 移除旧弹窗
     const old = document.getElementById('shareDetail');
@@ -954,13 +930,13 @@ const Renderer = {
 
     inner += '<div class="share-detail-elems">'+(entry.elements||[]).map(e => '<span class="card-tag" style="background:'+Utils.elementColor(e)+';color:#fff">'+e+'</span>').join('')+'</div>';
 
-    const coverPct = entry.totalElements ? Math.round((entry.attackCount||0)/entry.totalElements*100) : 0;
-    const resistPct = entry.totalElements ? Math.round((entry.defenseCount||0)/entry.totalElements*100) : 0;
+    const coverPct = entry.total_elements ? Math.round((entry.attack_count||0)/entry.total_elements*100) : 0;
+    const resistPct = entry.total_elements ? Math.round((entry.defense_count||0)/entry.total_elements*100) : 0;
     inner += '<div style="font-size:12px;color:var(--neutral-500);margin:8px 0">'
-      + '打击面 '+coverPct+'% ｜ 抵抗面 '+resistPct+'% ｜ 👁 '+(entry.clickCount||0)+' 次查看</div>';
+      + '打击面 '+coverPct+'% ｜ 抵抗面 '+resistPct+'% ｜ 👁 '+(entry.click_count||0)+' 次查看</div>';
 
     inner += '<div class="share-detail-pets">';
-    for (let i = 0; i < entry.petNames.length; i++) {
+    for (let i = 0; i < (entry.pet_names||[]).length; i++) {
       const p = pets[i];
       const skillsList = entry.skills?.[i] || [];
       const nature = entry.natures?.[i] || '';
@@ -968,7 +944,7 @@ const Renderer = {
 
       inner += '<div class="share-detail-pet">'
         + (p?.image ? '<img src="'+Utils.esc(p.image)+'" class="share-detail-img">' : '')
-        + '<div><strong>'+Utils.esc(entry.petNames[i])+'</strong>'
+        + '<div><strong>'+Utils.esc(entry.pet_names[i])+'</strong>'
         + (nature ? ' ['+nature+']' : '')
         + (will ? ' 愿力:'+will : '')
         + '<div style="font-size:12px;color:var(--neutral-500);margin-top:4px">'
@@ -1093,15 +1069,10 @@ const Renderer = {
     };
   },
 
-  /** 获取所有分享阵容 */
-  _getSharedTeams() {
-    try { return JSON.parse(localStorage.getItem('pvp_shared_teams') || '[]'); }
+  /** 获取所有分享阵容（从Supabase） */
+  async _getSharedTeams(sortBy) {
+    try { return await SupabaseDB.getTeams(sortBy); }
     catch { return []; }
-  },
-
-  /** 保存分享阵容 */
-  _saveSharedTeams(teams) {
-    localStorage.setItem('pvp_shared_teams', JSON.stringify(teams));
   },
 
   /** 打开分享弹窗 */
@@ -1126,29 +1097,25 @@ const Renderer = {
     document.body.appendChild(div);
   },
 
-  /** 执行分享 */
-  _doShareTeam() {
+  /** 执行分享（发布到Supabase） */
+  async _doShareTeam() {
     if (!this._isTeamComplete()) return;
     const descEl = document.getElementById('shareDesc');
     const description = descEl ? descEl.value.trim() : '';
     const coverage = this._calcTeamCoverage();
 
     const entry = {
-      id: Date.now(),
-      petNames: this._team.map(p => p.name),
+      pet_names: this._team.map(p => p.name),
       elements: [...new Set(this._team.flatMap(p => p.element||[]))],
       skills: {},
       natures: {},
       wills: {},
       description,
-      clickCount: 0,
-      createdAt: new Date().toISOString(),
-      attackCount: coverage.attackCount,
-      defenseCount: coverage.defenseCount,
-      totalElements: coverage.totalElements,
+      attack_count: coverage.attackCount,
+      defense_count: coverage.defenseCount,
+      total_elements: coverage.totalElements,
     };
 
-    // 保存配招/性格/愿力
     for (let i = 0; i < 6; i++) {
       const skills = (this._teamSkills[i]||[]).filter(Boolean).map(s => s.name);
       entry.skills[i] = skills;
@@ -1156,13 +1123,15 @@ const Renderer = {
       if (this._teamWill[i]) entry.wills[i] = this._teamWill[i];
     }
 
-    const teams = this._getSharedTeams();
-    teams.unshift(entry); // 最新在最前
-    this._saveSharedTeams(teams);
-
+    const result = await SupabaseDB.publishTeam(entry);
     const dialog = document.getElementById('shareDialog');
     if (dialog) dialog.remove();
-    alert('✅ 阵容已分享！可在「阵容分享」页查看');
+
+    if (result) {
+      alert('✅ 阵容已发布到云端！所有用户可见');
+    } else {
+      alert('⚠️ 发布失败，请检查网络后重试');
+    }
   },
 
   _saveTeamSnapshot() {
