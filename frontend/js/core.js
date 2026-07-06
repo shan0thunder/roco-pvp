@@ -19,24 +19,27 @@ const DataStore = {
     return this._loadPromise;
   },
   async _doLoad() {
-    try {
-      const resp = await fetch('data/product/product_data.json');
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      this._data = await resp.json();
-      return this._data;
-    } catch (e) {
-      console.warn('product_data.json 加载失败，尝试备用路径', e);
+    // 兼容本地开发 (frontend/) 和 GitHub Pages (root)
+    const paths = [];
+    const isLocal = window.location.pathname.includes('/frontend/');
+    if (isLocal) {
+      paths.push('../data/product/product_data.json');
+    }
+    paths.push('data/product/product_data.json');
+
+    for (const path of paths) {
       try {
-        const resp = await fetch('data/product/product_data.json');
+        const resp = await fetch(path);
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
         this._data = await resp.json();
         return this._data;
-      } catch (e2) {
-        console.error('数据加载失败', e2);
-        this._loadPromise = null;
-        throw e2;
+      } catch (e) {
+        console.warn(path + ' 加载失败', e);
       }
     }
+
+    this._loadPromise = null;
+    throw new Error('HTTP 404');
   },
 
   /** 异步加载技能索引 */
