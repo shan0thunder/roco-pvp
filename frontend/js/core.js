@@ -48,12 +48,16 @@ const DataStore = {
     return null;
   },
 
-    get pets() { 
-    const pets = this._data?.pets || [];
-    // 修复 GitHub Pages 上的图片路径
-    pets.forEach(p => {
-      if (p.image && p.image.startsWith('/data/')) p.image = p.image.slice(1);
-    });
+  get pets() {
+  const pets = this._data?.pets || [];
+  const isPages = window.location.hostname.includes('github.io');
+  if (isPages) {
+      pets.forEach(p => {
+        if (p.image && !p.image.startsWith('http')) {
+          p.image = 'https://cdn.jsdelivr.net/gh/shan0thunder/roco-pvp@main/' + p.image.replace(/^\//, '');
+        }
+      });
+    }
     return pets;
   },
   get skills() { return this._data?.skills || []; },
