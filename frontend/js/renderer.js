@@ -1254,19 +1254,39 @@ const Renderer = {
     this._leaderMap = this._leaderMap || {};
     if (!DataStore._data) return;
     const pets = DataStore.pets;
+
+    // 第一遍：标准首领映射
     for (const p of pets) {
       const n = p.name;
-      // "魔力猫（首领形态）" → map["魔力猫"] = "魔力猫（首领形态）"
       const m = n.match(/^(.+)（首领形态[^）]*）/);
       if (m) { this._leaderMap[m[1]] = n; continue; }
-      // "首领化魔力猫" → map["魔力猫"] = "首领化魔力猫"
       if (n.startsWith('首领化')) { this._leaderMap[n.slice(3)] = n; }
     }
-    // 补充：带括号标注的精灵也映射到同名基础精灵的首领
+
+    // 第二遍：带括号标注的精灵映射到同名基础精灵的首领
     for (const p of pets) {
       const base = this._stripNameSuffix(p.name);
       if (base !== p.name && this._leaderMap[base]) {
         this._leaderMap[p.name] = this._leaderMap[base];
+      }
+    }
+
+    // 第三遍：特殊关联——首领名与同首字精灵共享
+    // 例："棋契陛下（首领形态）" 关联所有"棋X"精灵（排除同名双字"棋棋"）
+    for (const p of pets) {
+      const m = p.name.match(/^(.+)（首领形态[^）]*）/);
+      if (!m) continue;
+      const leaderBase = m[1];
+      const prefix = leaderBase[0];
+      if (!prefix || leaderBase.length < 2) continue;
+      for (const p2 of pets) {
+        const n2 = p2.name;
+        if (n2 === p.name || this._leaderMap[n2]) continue;
+        const core2 = this._stripNameSuffix(n2);
+        // 核心名以首领首字开头（如"棋"），排除"棋棋"这种双字重复
+        if (core2.startsWith(prefix) && core2 !== leaderBase && core2 !== prefix + prefix) {
+          this._leaderMap[n2] = p.name;
+        }
       }
     }
   },

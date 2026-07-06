@@ -387,11 +387,27 @@ const Editor = {
       if (m) { map[m[1]] = n; continue; }
       if (n.startsWith('首领化')) { map[n.slice(3)] = n; }
     }
-    // 补充：带括号标注的精灵也映射到同名基础精灵的首领
+    // 带括号标注的精灵映射到同名基础精灵的首领
     for (const p of pets) {
       const base = this._stripNameSuffix(p.name);
       if (base !== p.name && map[base]) {
         map[p.name] = map[base];
+      }
+    }
+    // 首领名首字前缀匹配（例：棋契陛下→棋骑士/棋齐垒等，排除棋棋）
+    for (const p of pets) {
+      const m = p.name.match(/^(.+)（首领形态[^）]*）/);
+      if (!m) continue;
+      const leaderBase = m[1];
+      const prefix = leaderBase[0];
+      if (!prefix || leaderBase.length < 2) continue;
+      for (const p2 of pets) {
+        const n2 = p2.name;
+        if (n2 === p.name || map[n2]) continue;
+        const core2 = this._stripNameSuffix(n2);
+        if (core2.startsWith(prefix) && core2 !== leaderBase && core2 !== prefix + prefix) {
+          map[n2] = p.name;
+        }
       }
     }
     return map;
