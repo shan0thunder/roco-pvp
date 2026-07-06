@@ -49,9 +49,10 @@ const DataStore = {
   },
 
   get pets() {
-  const pets = this._data?.pets || [];
-  const isPages = window.location.hostname.includes('github.io');
-  if (isPages) {
+    const pets = this._data?.pets || [];
+    // GitHub Pages 上图片从 CDN 加载（jsDelivr）
+    const isPages = window.location.hostname.includes('github.io');
+    if (isPages) {
       pets.forEach(p => {
         if (p.image && !p.image.startsWith('http')) {
           p.image = 'https://cdn.jsdelivr.net/gh/shan0thunder/roco-pvp@main/' + p.image.replace(/^\//, '');
