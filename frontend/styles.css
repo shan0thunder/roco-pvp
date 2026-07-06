@@ -210,7 +210,10 @@ body {
 .sd-pet-elems { display: flex; gap: 2px; flex-wrap: wrap; justify-content: center; }
 .sd-pet-stats { width: 100%; }
 .sd-stat-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 3px; }
-.sd-stat-item { background: var(--white); border: 1px solid var(--neutral-100); border-radius: 4px; padding: 2px 4px; text-align: center; }
+.sd-stat-item { background: var(--white); border: 1px solid var(--neutral-100); border-radius: 4px; padding: 2px 4px; text-align: center; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+.sd-stat-item:hover { border-color: var(--primary-500); }
+.sd-stat-item.sel { background: #FFF3CD !important; border-color: #FFC107; }  /* 黄色高亮 */
+[data-theme="dark"] .sd-stat-item.sel { background: #3D2E00 !important; border-color: #FFC107; }
 .sd-stat-label { font-size: 8px; color: var(--neutral-500); display: block; }
 .sd-stat-val { font-size: 11px; font-weight: 700; color: var(--primary-500); }
 .sd-col-nature { display: flex; flex-direction: column; }

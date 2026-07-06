@@ -18,6 +18,7 @@ const Renderer = {
   _leaderMap: null,
   _slotOptionMode: null,
   _petNature: {},
+  _teamStats: {},  // 每只精灵选中的种族值 { slotIndex: ['speed','attack'] } 最多3个
   _selectedSlot: null,
   _expandedPet: null,
   _petFilterElem: '',
@@ -297,12 +298,12 @@ const Renderer = {
         + '<div class="sd-pet-name">'+Utils.esc(sp.name)+'</div>'
         + '<div class="sd-pet-elems">'+elBadges+'</div>'
         + '<div class="sd-pet-stats"><div class="sd-stat-row">'
-        + '<div class="sd-stat-item"><span class="sd-stat-label">生</span><span class="sd-stat-val">'+(st.hp??'-')+'</span></div>'
-        + '<div class="sd-stat-item"><span class="sd-stat-label">攻</span><span class="sd-stat-val">'+(st.attack??'-')+'</span></div>'
-        + '<div class="sd-stat-item"><span class="sd-stat-label">防</span><span class="sd-stat-val">'+(st.defense??'-')+'</span></div>'
-        + '<div class="sd-stat-item"><span class="sd-stat-label">魔攻</span><span class="sd-stat-val">'+(st.magic_attack??'-')+'</span></div>'
-        + '<div class="sd-stat-item"><span class="sd-stat-label">魔防</span><span class="sd-stat-val">'+(st.magic_defense??'-')+'</span></div>'
-        + '<div class="sd-stat-item"><span class="sd-stat-label">速</span><span class="sd-stat-val">'+(st.speed??'-')+'</span></div>'
+        + this._statItem(petIdx, st, 'hp', '生')
+        + this._statItem(petIdx, st, 'attack', '攻')
+        + this._statItem(petIdx, st, 'defense', '防')
+        + this._statItem(petIdx, st, 'magic_attack', '魔攻')
+        + this._statItem(petIdx, st, 'magic_defense', '魔防')
+        + this._statItem(petIdx, st, 'speed', '速')
         + '</div></div></div>'
         + '<div class="sd-col sd-col-nature">'
         + '<div class="sd-col-title">性格</div>'
@@ -984,6 +985,7 @@ const Renderer = {
       this._teamWill[idx] = '';
       this._teamLeader[idx] = false;
       this._petNature[idx] = '';
+      this._teamStats[idx] = [];
       this._selectedSlot = null;
       this._saveTeamSnapshot();
       this._renderCurrentView();
@@ -996,6 +998,7 @@ const Renderer = {
     delete this._teamWill[i];
     delete this._teamLeader[i];
     delete this._petNature[i];
+    delete this._teamStats[i];
     for (const key of ['_teamSkills', '_teamWill', '_teamLeader', '_petNature']) {
       const reindexed = {};
       for (const k of Object.keys(this[key])) {
@@ -1010,6 +1013,30 @@ const Renderer = {
   },
 
   /** 自动保存队伍快照到 localStorage */
+  /** 渲染可点击的种族值项 */
+  _statItem(petIdx, st, key, label) {
+    const selected = this._teamStats[petIdx] || [];
+    const isSel = selected.includes(key);
+    const val = st[key] ?? '-';
+    const cls = isSel ? 'sd-stat-item sel' : 'sd-stat-item';
+    return '<div class="'+cls+'" onclick="Renderer._toggleStat('+petIdx+',\''+key+'\')"><span class="sd-stat-label">'+label+'</span><span class="sd-stat-val">'+val+'</span></div>';
+  },
+
+  /** 切换种族值选中（最多3个） */
+  _toggleStat(petIdx, key) {
+    if (!this._teamStats[petIdx]) this._teamStats[petIdx] = [];
+    const selected = this._teamStats[petIdx];
+    const idx = selected.indexOf(key);
+    if (idx >= 0) {
+      selected.splice(idx, 1);  // 取消选中
+    } else {
+      if (selected.length >= 3) return;  // 最多3个
+      selected.push(key);
+    }
+    this._saveTeamSnapshot();
+    this._renderCurrentView();
+  },
+
   /** 计算攻击属性对某个精灵的最终克制倍率（支持双属性） */
   _calcEffectiveness(atk, pet) {
     const chart = DataStore.typeChart || {};
@@ -1121,6 +1148,8 @@ const Renderer = {
       entry.skills[i] = skills;
       if (this._petNature[i]) entry.natures[i] = this._petNature[i];
       if (this._teamWill[i]) entry.wills[i] = this._teamWill[i];
+      if (this._teamStats[i]?.length) entry.stats = entry.stats || {};
+      if (this._teamStats[i]?.length) entry.stats[i] = this._teamStats[i];
     }
 
     const result = await SupabaseDB.publishTeam(entry);
@@ -1141,6 +1170,7 @@ const Renderer = {
         will: Object.fromEntries(Object.entries(this._teamWill).filter(([k,v]) => v)),
         leader: Object.fromEntries(Object.entries(this._teamLeader).filter(([k,v]) => v)),
         nature: Object.fromEntries(Object.entries(this._petNature).filter(([k,v]) => v)),
+        stats: Object.fromEntries(Object.entries(this._teamStats).filter(([k,v]) => v && v.length)),
         savedAt: Date.now(),
       };
       localStorage.setItem('pvp_team_snapshot', JSON.stringify(snapshot));
@@ -1160,6 +1190,7 @@ const Renderer = {
       this._teamWill = snap.will || {};
       this._teamLeader = snap.leader || {};
       this._petNature = snap.nature || {};
+      this._teamStats = snap.stats || {};
       this._team.forEach((_, i) => {
         if (!this._teamSkills[i]) this._teamSkills[i] = [null, null, null, null];
       });
@@ -1169,7 +1200,7 @@ const Renderer = {
   _clearTeam() {
     this._team = []; this._teamSkills = {};
     this._teamWill = {}; this._teamLeader = {};
-    this._petNature = {}; this._selectedSlot = null;
+    this._petNature = {}; this._teamStats = {}; this._selectedSlot = null;
     this._saveTeamSnapshot();
     this._renderCurrentView();
   },
