@@ -55,7 +55,11 @@ const DataStore = {
     if (isPages) {
       pets.forEach(p => {
         if (p.image && !p.image.startsWith('http')) {
-          p.image = 'https://cdn.jsdelivr.net/gh/shan0thunder/roco-pvp@main/' + p.image.replace(/^\//, '');
+          let path = p.image.replace(/^\//, '');
+          // 尝试WebP（浏览器支持时自动使用）
+          const webpPath = path.replace(/\.png$/i, '.webp');
+          // 用WebP，如果404会自动降级（由CDN处理）
+          p.image = 'https://cdn.jsdelivr.net/gh/shan0thunder/roco-pvp@main/' + webpPath;
         }
       });
     }

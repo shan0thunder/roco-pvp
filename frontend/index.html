@@ -29,10 +29,16 @@
   <span class="search-count" id="searchCount"></span>
 </div>
 
+<!-- ====== 骨架屏（数据加载时显示） ====== -->
+<div id="loadingSkeleton" style="max-width:1200px;margin:0 auto;padding:16px;display:none">
+  <div class="sk-header"></div>
+  <div class="sk-row"><div class="sk-box"></div><div class="sk-box"></div><div class="sk-box"></div></div>
+  <div class="sk-row"><div class="sk-box"></div><div class="sk-box"></div><div class="sk-box"></div><div class="sk-box"></div></div>
+  <div class="sk-row"><div class="sk-box"></div><div class="sk-box"></div><div class="sk-box"></div></div>
+</div>
+
 <!-- ====== 主内容区 ====== -->
-<main id="mainContent">
-  <div class="loading">加载数据中...</div>
-</main>
+<main id="mainContent"></main>
 
 <!-- ====== 页面底部 ====== -->
 <footer class="app-footer">

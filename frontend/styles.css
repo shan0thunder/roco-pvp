@@ -235,7 +235,7 @@ body {
   *, *::before, *::after { transition-duration: 0s !important; animation-duration: 0s !important; }
 }
 
-/* 技能页面增强 */
+[data-theme="dark"] .share-card { background: var(--neutral-100); }
 .skill-table .card-tag { font-size: 10px; padding: 1px 6px; white-space: nowrap; }
 .skill-table td:last-child { max-width: 200px; white-space: normal; font-size: 12px; }
 
@@ -314,3 +314,106 @@ body {
 [data-theme="dark"] .share-detail-pet { background: var(--neutral-100); }
 [data-theme="dark"] .share-dialog { background: var(--neutral-100); }
 [data-theme="dark"] .share-detail-panel { background: var(--neutral-100); }
+
+/* ============================================
+   移动端响应式
+   ============================================ */
+@media (max-width: 768px) {
+  /* 导航 */
+  .header-inner { flex-wrap: wrap; gap: var(--space-2); padding: 0 var(--space-2); }
+  .logo { font-size: var(--text-base); }
+  .main-nav { gap: 0; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; width: 100%; }
+  .main-nav::-webkit-scrollbar { display: none; }
+  .nav-item { padding: var(--space-1) var(--space-2); font-size: var(--text-sm); flex-shrink: 0; }
+
+  /* 卡片网格 */
+  .card-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: var(--space-2); }
+  .card { padding: var(--space-2); }
+  .card-img { height: 80px; }
+  .card-name { font-size: var(--text-sm); }
+  .card-expanded { grid-column: span 1 !important; grid-row: span 1 !important; height: auto !important; }
+  .card-expand-top { flex-direction: column; }
+  .card-expand-left { flex: none; }
+  .card-expand-right .stat-row { grid-template-columns: repeat(3, 1fr); }
+
+  /* 配队器 */
+  .builder-bar { padding: var(--space-2); }
+  .slots-row { flex-wrap: wrap; gap: var(--space-1); }
+  .bar-slot { min-width: calc(33% - 4px); flex: none; }
+  .bar-slot.empty { min-height: 80px; }
+  .bar-slot-img { width: 40px; height: 40px; }
+  .bar-slot-name { font-size: 10px; }
+  .config-row { flex-wrap: wrap; }
+  .bar-config-cell { min-width: calc(33% - 4px); }
+  .analysis-row { flex-wrap: wrap; }
+  .bar-analysis-block { min-width: calc(50% - 4px); }
+
+  /* slot详情面板 */
+  .slot-detail-panel { grid-template-columns: 1fr 1fr; max-height: none; gap: var(--space-1); padding: var(--space-2); }
+  .sd-col-pet { grid-column: span 2; flex-direction: row; gap: var(--space-2); }
+  .sd-pet-img { width: 60px; height: 60px; }
+  .sd-col-skills { grid-column: span 2; }
+  .sd-pool-scroll { max-height: 150px; }
+  .sd-col-skills .skill-slot { min-height: 44px; }
+
+  /* 技能页面 */
+  .skill-table { font-size: 12px; }
+  .skill-table td, .skill-table th { padding: 4px; }
+  .skill-table td:last-child { max-width: 100px; }
+
+  /* 分享页 */
+  .share-grid { grid-template-columns: 1fr; }
+  .share-pet-mini { width: 40px; }
+  .share-pet-mini img { width: 32px; height: 32px; }
+
+  /* 其他页 */
+  .other-grid { grid-template-columns: 1fr; }
+  .header-inner { padding: 0 var(--space-2); }
+
+  /* 详情弹窗 */
+  .modal { margin: var(--space-2); padding: var(--space-4); }
+  .modal .stat-row { grid-template-columns: repeat(3, 1fr); gap: 4px; }
+
+  /* 分享详情 */
+  .share-detail-pets { gap: var(--space-2); }
+  .share-detail-pet { flex-direction: column; align-items: center; text-align: center; }
+
+  /* 筛选项 */
+  .filter-row select { font-size: 12px; padding: 4px 6px; min-width: 60px; }
+}
+
+/* 移动端小屏 */
+@media (max-width: 480px) {
+  .card-grid { grid-template-columns: repeat(2, 1fr); gap: var(--space-1); }
+  .card { padding: var(--space-1); }
+  .card-img { height: 64px; }
+  .card-add-btn { width: 20px; height: 20px; font-size: 12px; line-height: 20px; }
+  .bar-slot { min-width: calc(50% - 4px); }
+  .bar-analysis-block { min-width: 100%; }
+  .slot-detail-panel { grid-template-columns: 1fr; }
+  .sd-col-pet { grid-column: span 1; }
+  .sd-col-skills { grid-column: span 1; }
+  .main-nav .nav-item { font-size: 12px; padding: var(--space-1) var(--space-2); }
+}
+
+/* ============================================
+   骨架屏（加载中动画）
+   ============================================ */
+@keyframes sk-shimmer { 0%{background-position:-200px 0} 100%{background-position:calc(200px + 100%) 0} }
+.sk-header { height: 28px; width: 40%; margin-bottom: 24px; border-radius: 6px; background: linear-gradient(90deg, var(--neutral-100) 25%, var(--neutral-50) 50%, var(--neutral-100) 75%); background-size: 200px 100%; animation: sk-shimmer 1.5s infinite; }
+.sk-row { display: flex; gap: 12px; margin-bottom: 12px; }
+.sk-box { height: 180px; flex: 1; border-radius: 8px; background: linear-gradient(90deg, var(--neutral-100) 25%, var(--neutral-50) 50%, var(--neutral-100) 75%); background-size: 200px 100%; animation: sk-shimmer 1.5s infinite; }
+[data-theme="dark"] .sk-header,
+[data-theme="dark"] .sk-box { background: linear-gradient(90deg, var(--neutral-100) 25%, var(--neutral-800) 50%, var(--neutral-100) 75%); background-size: 200px 100%; }
+
+@media (max-width: 768px) {
+  .sk-row { flex-wrap: wrap; }
+  .sk-box { min-width: calc(50% - 6px); height: 140px; }
+}
+@media (max-width: 480px) {
+  .sk-box { min-width: 100%; height: 120px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0s !important; animation-duration: 0s !important; }
+}

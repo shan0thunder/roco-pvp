@@ -26,6 +26,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
+  // 显示骨架屏
+  const skeleton = document.getElementById('loadingSkeleton');
+  if (skeleton) skeleton.style.display = 'block';
+
   // 初始化
   Renderer.init();
   Router.init();
@@ -35,6 +39,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 显示版本
   try {
     const data = await DataStore.load();
+    // 隐藏骨架屏
+    if (skeleton) skeleton.style.display = 'none';
     const versionEl = document.getElementById('dataVersion');
     if (versionEl && data._meta?.exported_at) {
       versionEl.textContent = data._meta.exported_at.slice(0, 10);
@@ -42,5 +48,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   } catch (e) {
     document.getElementById('mainContent').innerHTML =
       '<div class="empty-state">⚠️ 数据文件未找到<br>请先运行: <code>python cli.py export-product</code></div>';
+  } finally {
+    // 确保骨架屏隐藏
+    if (skeleton) skeleton.style.display = 'none';
   }
 });
