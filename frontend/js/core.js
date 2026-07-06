@@ -48,7 +48,14 @@ const DataStore = {
     return null;
   },
 
-  get pets() { return this._data?.pets || []; },
+    get pets() { 
+    const pets = this._data?.pets || [];
+    // 修复 GitHub Pages 上的图片路径
+    pets.forEach(p => {
+      if (p.image && p.image.startsWith('/data/')) p.image = p.image.slice(1);
+    });
+    return pets;
+  },
   get skills() { return this._data?.skills || []; },
   get teams() { return this._data?.pvp_teams || []; },
   get typeChart() { return this._data?.type_chart || {}; },
