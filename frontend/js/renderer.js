@@ -863,11 +863,8 @@ const Renderer = {
       + '<h3>送开发者一杯咖啡</h3>'
       + '<p>如果你觉得这个工具有帮助，可以请我喝杯咖啡 ☕ 支持持续更新</p>'
       + '<div class="other-coffee-area">'
-      + '<div class="other-coffee-qr-placeholder">'
-      + '<span style="font-size:48px">☕</span>'
-      + '<span style="font-size:14px;color:var(--neutral-500);margin-top:8px">微信/支付宝</span>'
-      + '</div>'
-      + '<p style="font-size:12px;color:var(--neutral-500);margin-top:8px">扫码支持（后续添加收款码）</p>'
+      + '<img src="data/pay-good.jpg" style="width:160px;height:160px;object-fit:contain;border-radius:12px" alt="赞赏码">'
+      + '<p style="font-size:12px;color:var(--neutral-500);margin-top:8px">赞赏支持，感谢 ☕</p>'
       + '</div>'
       + '</div>'
 
