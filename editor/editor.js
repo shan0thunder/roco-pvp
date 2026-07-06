@@ -373,6 +373,11 @@ const Editor = {
     this.openEdit(leaderName);
   },
 
+  /** 去除精灵名中的括号标注词 */
+  _stripNameSuffix(name) {
+    return name.replace(/[（(][^）)]*[）)]/g, '').trim();
+  },
+
   _buildLeaderMap() {
     const map = {};
     const pets = this._data?.pets || [];
@@ -381,6 +386,13 @@ const Editor = {
       const m = n.match(/^(.+)（首领形态[^）]*）/);
       if (m) { map[m[1]] = n; continue; }
       if (n.startsWith('首领化')) { map[n.slice(3)] = n; }
+    }
+    // 补充：带括号标注的精灵也映射到同名基础精灵的首领
+    for (const p of pets) {
+      const base = this._stripNameSuffix(p.name);
+      if (base !== p.name && map[base]) {
+        map[p.name] = map[base];
+      }
     }
     return map;
   },

@@ -1244,6 +1244,11 @@ const Renderer = {
     this._renderCurrentView();
   },
 
+  /** 去除精灵名中的括号标注词，如 "魔力猫（首领形态）" → "魔力猫" */
+  _stripNameSuffix(name) {
+    return name.replace(/[（(][^）)]*[）)]/g, '').trim();
+  },
+
   _buildLeaderMap() {
     if (this._leaderMap && Object.keys(this._leaderMap).length > 0) return;
     this._leaderMap = this._leaderMap || {};
@@ -1251,15 +1256,31 @@ const Renderer = {
     const pets = DataStore.pets;
     for (const p of pets) {
       const n = p.name;
+      // "魔力猫（首领形态）" → map["魔力猫"] = "魔力猫（首领形态）"
       const m = n.match(/^(.+)（首领形态[^）]*）/);
       if (m) { this._leaderMap[m[1]] = n; continue; }
+      // "首领化魔力猫" → map["魔力猫"] = "首领化魔力猫"
       if (n.startsWith('首领化')) { this._leaderMap[n.slice(3)] = n; }
+    }
+    // 补充：带括号标注的精灵也映射到同名基础精灵的首领
+    for (const p of pets) {
+      const base = this._stripNameSuffix(p.name);
+      if (base !== p.name && this._leaderMap[base]) {
+        this._leaderMap[p.name] = this._leaderMap[base];
+      }
     }
   },
 
+  /** 查询精灵的首领形态名，支持括号标注词匹配 */
   _getLeaderName(name) {
     this._buildLeaderMap();
-    return this._leaderMap ? (this._leaderMap[name] || null) : null;
+    if (!this._leaderMap) return null;
+    // 精确匹配优先
+    if (this._leaderMap[name]) return this._leaderMap[name];
+    // 去掉括号标注再匹配
+    const base = this._stripNameSuffix(name);
+    if (base !== name && this._leaderMap[base]) return this._leaderMap[base];
+    return null;
   },
 
   _toggleLeader(slotIdx) {
