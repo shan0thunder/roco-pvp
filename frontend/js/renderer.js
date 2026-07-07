@@ -912,7 +912,7 @@ const Renderer = {
       + '</div>'
       + '<div class="other-contact-links">'
       + '<a href="https://github.com/your-username/roco-pvp/issues/new" target="_blank" class="other-link">🐛 GitHub Issues</a>'
-      + '<span class="other-link disabled" onclick="Renderer._copyText(\'1374168437@qq.com\')">📧 1374168437@qq.com 点击复制</span>'
+      + '<span class="other-link disabled" onclick="Renderer._copyText(\'alatus19256@163.com\')">📧 alatus19256@163.com 点击复制</span>'
       + '</div>'
       + '</div>'
 
@@ -925,7 +925,7 @@ const Renderer = {
       + '<span class="other-badge">联系方式</span>'
       + '</div>'
       + '<div class="other-contact-links">'
-      + '<span class="other-link" onclick="Renderer._copyText(\'1374168437@qq.com\')">📧 邮箱: 1374168437@qq.com 点击复制</span>'
+      + '<span class="other-link" onclick="Renderer._copyText(\'alatus19256@163.com\')">📧 邮箱: alatus19256@163.com 点击复制</span>'
       + '<span class="other-link" onclick="Renderer._copyText(\'@luoke_pvp\')">🐦 社交: @luoke_pvp 点击复制</span>'
       + '</div>'
       + '</div>'
