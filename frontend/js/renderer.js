@@ -287,10 +287,10 @@ const Renderer = {
     html += '</div>'
       + '<div class="builder-bar-row analysis-row">';
     const analysisBlocks = [
-      { label: '打击面', tip: '队伍精灵的攻击属性所能克制的属性集合（×2）', items: Object.keys(cover), cls: 'tag-strong' },
-      { label: '打击面缺口', tip: '队伍中所有属性均无法克制的属性，建议补对应攻击手', items: coverGap, cls: 'tag-weak' },
-      { label: '高威胁属性', tip: '能克制队伍中2只及以上精灵的属性（最终倍率>1.0），建议补抵抗手', items: highThreat, cls: 'tag-danger' },
-      { label: '无抵抗属性', tip: '没有任何精灵能抵抗的属性（最终倍率≤0.5），容易被对方克制系打穿', items: noResist, cls: 'tag-weak' },
+      { label: '打击面', tip: '队伍精灵的攻击属性所能克制的属性集合（×2）', items: Object.keys(cover), cls: 'tag-strong', tipMode: 'cover' },
+      { label: '打击面缺口', tip: '队伍中所有属性均无法克制的属性，建议补对应攻击手', items: coverGap, cls: 'tag-weak', tipMode: 'gap' },
+      { label: '高威胁属性', tip: '能克制队伍中2只及以上精灵的属性（最终倍率>1.0），建议补抵抗手', items: highThreat, cls: 'tag-danger', tipMode: 'threat' },
+      { label: '无抵抗属性', tip: '没有任何精灵能抵抗的属性（最终倍率≤0.5），容易被对方克制系打穿', items: noResist, cls: 'tag-weak', tipMode: 'noResist' },
     ];
     for (const block of analysisBlocks) {
       html += '<div class="bar-analysis-block">'
@@ -301,7 +301,7 @@ const Renderer = {
       const showItems = block.items.slice(0, 8);
       const remaining = block.items.length - showItems.length;
       for (const e of showItems) {
-        html += '<span class="analysis-dot ' + block.cls + '" style="background:' + Utils.elementColor(e) + '" title="'+Utils.esc(this._typeTooltip(e))+'">'+Utils.esc(e)+'</span>';
+        html += '<span class="analysis-dot ' + block.cls + '" style="background:' + Utils.elementColor(e) + '" title="'+Utils.esc(this._typeTooltip(e, block.tipMode))+'">'+Utils.esc(e)+'</span>';
       }
       if (remaining > 0) html += '<span class="analysis-dot-more">+'+remaining+'</span>';
       if (!block.items.length) html += '<span class="analysis-dot-none">无</span>';
@@ -1603,17 +1603,35 @@ const Renderer = {
     this._renderCurrentView();
   },
 
-  _typeTooltip(elem) {
+  _typeTooltip(elem, mode) {
     if (!DataStore._data) return '';
     const chart = DataStore.typeChart || {};
     const allElems = DataStore.elements || [];
-    // 该属性攻击时克制谁
     const attackRow = chart[elem] || {};
-    const strong = allElems.filter(e => attackRow[e] >= 2);
-    const weakAtk = allElems.filter(e => attackRow[e] > 0 && attackRow[e] < 1);
-    let text = '克制: ' + (strong.length ? strong.join(', ') : '无');
-    if (weakAtk.length) text += '\n被克: ' + weakAtk.join(', ');
-    return text;
+    const strong = allElems.filter(e => attackRow[e] >= 2);       // 攻击克制
+    const resisted = allElems.filter(e => attackRow[e] > 0 && attackRow[e] < 1); // 攻击被抗
+
+    // 查哪些属性攻击能克制该属性（防守端）
+    const weakDef = allElems.filter(atk => (chart[atk]||{})[elem] >= 2);
+    const resistDef = allElems.filter(atk => (chart[atk]||{})[elem] > 0 && (chart[atk]||{})[elem] < 1);
+
+    const strongT = strong.length ? strong.join(', ') : '无';
+    const resistedT = resisted.length ? resisted.join(', ') : '无';
+    const weakDefT = weakDef.length ? weakDef.join(', ') : '无';
+    const resistDefT = resistDef.length ? resistDef.join(', ') : '无';
+
+    switch (mode) {
+      case 'cover':     // 打击面：克制 / 被抵抗
+        return '克制: ' + strongT + '\n被抵抗: ' + resistedT;
+      case 'gap':       // 打击面缺口：克制 / 被克制
+        return '克制: ' + strongT + '\n被克制: ' + weakDefT;
+      case 'threat':    // 高威胁属性：克制 / 抵抗
+        return '克制: ' + strongT + '\n抵抗: ' + resistDefT;
+      case 'noResist':  // 无抵抗属性：克制 / 被抵抗
+        return '克制: ' + strongT + '\n被抵抗: ' + resistedT;
+      default:
+        return '克制: ' + strongT + '\n被抵抗: ' + resistedT;
+    }
   },
 
   _toggleDropdown(e) {
