@@ -416,12 +416,17 @@ body {
   .card { padding: var(--space-1); }
   .card-img { height: 64px; }
   .card-add-btn { width: 20px; height: 20px; font-size: 12px; line-height: 20px; }
-  .bar-slot { min-width: calc(50% - 4px); }
+  .bar-slot { min-width: calc(33% - 4px); }  /* 3+3布局 */
+  .bar-slot-img { width: 40px; height: 40px; }
+  .bar-slot-name { font-size: 10px; }
   .bar-analysis-block { min-width: 100%; }
+  .analysis-row { flex-wrap: wrap; }
   .slot-detail-panel { grid-template-columns: 1fr; }
   .sd-col-pet { grid-column: span 1; }
   .sd-col-skills { grid-column: span 1; }
   .main-nav .nav-item { font-size: 12px; padding: var(--space-1) var(--space-2); }
+  /* 4个分析块2+2排列 */
+  .bar-analysis-block { min-width: calc(50% - 4px); }
 }
 
 /* ============================================

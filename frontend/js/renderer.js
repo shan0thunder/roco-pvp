@@ -34,11 +34,12 @@ const Renderer = {
 
   // 配队器筛选
   _builderFilter: null,
-  _builderCollapsed: false,
+  _builderCollapsed: true,  // 默认折叠
   _dragSkillData: null,
   _dragSlotIdx: null,
   _searchKw: '',
   _searchTimer: null,
+  _dragTarget: null, _dragOffX: 0, _dragOffY: 0,
   _searchComposing: false,  // IME输入法组合中
 
   init() {
@@ -74,6 +75,62 @@ const Renderer = {
     document.addEventListener('click', () => {
       document.querySelectorAll('.dropdown-menu.open').forEach(m => m.classList.remove('open'));
     });
+  },
+
+  /** 配队器拖拽 */
+  _enableDrag(el) {
+    if (!el) return;
+    el.classList.add('drag-enabled');
+    el.addEventListener('mousedown', (e) => this._dragStart(e));
+    el.addEventListener('touchstart', (e) => this._dragStart(e), {passive: true});
+  },
+
+  _dragStart(e) {
+    const target = e.currentTarget;
+    if (e.target.closest('.btn,.btn-sm,.btn-filter,.bar-slot,.card,.filter-select')) return;
+    const touch = e.touches?.[0];
+    this._dragTarget = target;
+    this._dragOffX = (touch?.clientX || e.clientX) - target.getBoundingClientRect().left;
+    this._dragOffY = (touch?.clientY || e.clientY) - target.getBoundingClientRect().top;
+    target.style.cursor = 'grabbing';
+    target.style.userSelect = 'none';
+    document.addEventListener('mousemove', this._dragMove = this._dragMove.bind(this));
+    document.addEventListener('mouseup', this._dragEnd = this._dragEnd.bind(this));
+    document.addEventListener('touchmove', this._dragMove, {passive: true});
+    document.addEventListener('touchend', this._dragEnd);
+    // 显示提示
+    if (!target.dataset.dragHinted) {
+      target.dataset.dragHinted = '1';
+      const hint = document.createElement('div');
+      hint.textContent = '↕ 可拖动';
+      hint.style.cssText = 'position:absolute;top:-20px;right:4px;font-size:10px;color:var(--primary-500);background:var(--primary-50);padding:2px 8px;border-radius:4px;opacity:0;transition:opacity 0.3s';
+      target.style.position = 'relative';
+      target.appendChild(hint);
+      requestAnimationFrame(() => { hint.style.opacity = '1'; setTimeout(() => { hint.style.opacity = '0'; setTimeout(() => hint.remove(), 400); }, 1200); });
+    }
+  },
+
+  _dragMove(e) {
+    if (!this._dragTarget) return;
+    const touch = e.touches?.[0];
+    const x = (touch?.clientX || e.clientX) - this._dragOffX;
+    const y = (touch?.clientY || e.clientY) - this._dragOffY;
+    this._dragTarget.style.position = 'fixed';
+    this._dragTarget.style.left = Math.max(0, x) + 'px';
+    this._dragTarget.style.top = Math.max(0, y) + 'px';
+    this._dragTarget.style.zIndex = '100';
+    this._dragTarget.style.width = this._dragTarget.offsetWidth + 'px';
+  },
+
+  _dragEnd() {
+    if (!this._dragTarget) return;
+    this._dragTarget.style.cursor = '';
+    this._dragTarget.style.userSelect = '';
+    this._dragTarget = null;
+    document.removeEventListener('mousemove', this._dragMove);
+    document.removeEventListener('mouseup', this._dragEnd);
+    document.removeEventListener('touchmove', this._dragMove);
+    document.removeEventListener('touchend', this._dragEnd);
   },
 
   _setActiveNav(route) {
@@ -497,6 +554,12 @@ const Renderer = {
     if (pets.length === 0) html += '<div class="empty-state">未找到匹配的精灵，试试其他关键词</div>';
 
     this._container.innerHTML = html;
+
+    // 配队器可拖拽
+    const builder = this._container.querySelector('.builder-bar');
+    const detail = this._container.querySelector('.slot-detail-panel');
+    if (builder) this._enableDrag(builder);
+    if (detail) this._enableDrag(detail);
 
     // 属性表高亮 (if present)
     const t = document.getElementById('typeChartTable');
