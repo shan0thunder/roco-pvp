@@ -869,7 +869,7 @@ const Renderer = {
           + '<span>'+Utils.truncate(p?.name||'',4)+'</span>'
           + '</div>';
       }
-      html += '</div></div>'
+      html += '</div></div></div>'
       if (entry.description) {
         html += '<div class="share-desc">'+Utils.esc(entry.description)+'</div>';
       }
