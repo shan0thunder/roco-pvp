@@ -891,7 +891,7 @@ const Renderer = {
         }
         html += '</div>';
       }
-      if (isMine) {
+      if (isMine && showMine) {
         html += '<div style="display:flex;gap:6px;margin-top:6px">'
           + '<button class="btn-sm" style="background:var(--danger-500)" onclick="event.stopPropagation();Renderer._deleteMyTeam('+entry.id+')">🗑 删除</button>'
           + '</div>';
