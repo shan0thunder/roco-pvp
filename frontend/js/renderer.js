@@ -1306,6 +1306,7 @@ const Renderer = {
 
     const entry = {
       user_id: DeviceID.get(),
+      team_name: teamName || null,
       pet_names: this._team.map(p => p.name),
       elements: [...new Set(this._team.flatMap(p => p.element||[]))],
       skills: {},
