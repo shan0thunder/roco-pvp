@@ -34,7 +34,7 @@ const Renderer = {
 
   // 配队器筛选
   _builderFilter: null,
-  _builderCollapsed: true,  // 默认折叠
+  _builderCollapsed: window.innerWidth < 768,  // 手机端默认折叠
   _dragSkillData: null,
   _dragSlotIdx: null,
   _searchKw: '',
@@ -98,16 +98,7 @@ const Renderer = {
     document.addEventListener('mouseup', this._dragEnd = this._dragEnd.bind(this));
     document.addEventListener('touchmove', this._dragMove, {passive: true});
     document.addEventListener('touchend', this._dragEnd);
-    // 显示提示
-    if (!target.dataset.dragHinted) {
-      target.dataset.dragHinted = '1';
-      const hint = document.createElement('div');
-      hint.textContent = '↕ 可拖动';
-      hint.style.cssText = 'position:absolute;top:-20px;right:4px;font-size:10px;color:var(--primary-500);background:var(--primary-50);padding:2px 8px;border-radius:4px;opacity:0;transition:opacity 0.3s';
-      target.style.position = 'relative';
-      target.appendChild(hint);
-      requestAnimationFrame(() => { hint.style.opacity = '1'; setTimeout(() => { hint.style.opacity = '0'; setTimeout(() => hint.remove(), 400); }, 1200); });
-    }
+    // 提示已放到展开时触发
   },
 
   _dragMove(e) {
@@ -555,11 +546,23 @@ const Renderer = {
 
     this._container.innerHTML = html;
 
-    // 配队器可拖拽
-    const builder = this._container.querySelector('.builder-bar');
-    const detail = this._container.querySelector('.slot-detail-panel');
-    if (builder) this._enableDrag(builder);
-    if (detail) this._enableDrag(detail);
+    // 配队器可拖拽（仅手机端）
+    if (window.innerWidth < 768) {
+      const builder = this._container.querySelector('.builder-bar');
+      const detail = this._container.querySelector('.slot-detail-panel');
+      if (builder) this._enableDrag(builder);
+      if (detail) this._enableDrag(detail);
+      // 展开时显示拖拽提示
+      if (builder && !this._builderCollapsed && !builder.dataset.expandHinted) {
+        builder.dataset.expandHinted = '1';
+        const hint = document.createElement('div');
+        hint.textContent = '↕ 可拖动';
+        hint.style.cssText = 'position:absolute;top:-18px;right:8px;font-size:10px;color:var(--primary-500);background:var(--primary-50);padding:2px 8px;border-radius:4px;opacity:0;transition:opacity 0.3s;z-index:20';
+        builder.style.position = 'relative';
+        builder.appendChild(hint);
+        requestAnimationFrame(() => { hint.style.opacity = '1'; setTimeout(() => { hint.style.opacity = '0'; setTimeout(() => hint.remove(), 400); }, 1500); });
+      }
+    }
 
     // 属性表高亮 (if present)
     const t = document.getElementById('typeChartTable');
