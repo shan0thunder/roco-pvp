@@ -774,9 +774,9 @@ const Renderer = {
     const petMap = {};
     for (const p of DataStore.pets) petMap[p.name] = p;
 
-    const myId = DeviceID.get();
-    const showMine = this._shareShowMine;
-    const kw = (this._searchKw || '').toLowerCase();
+    let myId = DeviceID.get();
+    let showMine = this._shareShowMine;
+    let kw = (this._searchKw || '').toLowerCase();
     const sortField = this._shareSortBy === 'click' ? 'click_count'
       : this._shareSortBy === 'cover' ? 'attack_count'
       : this._shareSortBy === 'resist' ? 'defense_count'
