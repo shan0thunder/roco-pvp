@@ -132,8 +132,38 @@ const SupabaseDB = (() => {
     return data || [];
   }
 
-  return { getTeams, publishTeam, clickTeam, searchTeams };
+  /** 删除阵容（需提供user_id验证） */
+  async function deleteTeam(id, userId) {
+    const c = getClient();
+    if (!c) return false;
+    const { error } = await c.from('shared_teams').delete().eq('id', id).eq('user_id', userId);
+    return !error;
+  }
+
+  /** 更新阵容 */
+  async function updateTeam(id, userId, updates) {
+    const c = getClient();
+    if (!c) return false;
+    const { error } = await c.from('shared_teams').update(updates).eq('id', id).eq('user_id', userId);
+    return !error;
+  }
+
+  return { getTeams, publishTeam, clickTeam, searchTeams, deleteTeam, updateTeam };
 })();
+
+// ============================================================
+// 设备标识（用于识别"我的阵容"）
+// ============================================================
+const DeviceID = {
+  get() {
+    let id = localStorage.getItem('pvp_device_id');
+    if (!id) {
+      id = 'dev_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
+      localStorage.setItem('pvp_device_id', id);
+    }
+    return id;
+  },
+};
 
 // ============================================================
 // 工具函数

@@ -29,6 +29,7 @@ const Renderer = {
 
   // 阵容分享
   _shareSortBy: 'new',  // 排序: new|click|cover|resist
+  _shareShowMine: false, // true=只显示我的阵容
   _shareDialog: null,   // 分享弹窗DOM
 
   // 配队器筛选
@@ -791,6 +792,9 @@ const Renderer = {
 
     // 前端筛选
     let filtered = allTeams;
+    if (showMine) {
+      filtered = filtered.filter(t => t.user_id === myId);
+    }
     if (kw) {
       filtered = filtered.filter(t =>
         (t.pet_names||[]).some(n => n.includes(kw)) ||
@@ -799,7 +803,19 @@ const Renderer = {
       );
     }
 
-    let html = '<div class="page-header"><h2>阵容分享</h2><p>查看玩家分享的PVP阵容，找到适合你的队伍</p></div>';
+    const myId = DeviceID.get();
+    const showMine = this._shareShowMine;
+
+    let html = '<div class="page-header"><h2>阵容分享</h2>'
+      + '<p>查看玩家分享的PVP阵容，找到适合你的队伍'
+      + ' <span class="info-icon" title="你的设备会记住你发布的阵容，只有你能管理。清空浏览器数据后标识丢失，但已发布的阵容仍在。">i</span>'
+      + '</p></div>';
+
+    // 标签栏
+    html += '<div class="filter-row" style="margin-bottom:12px">'
+      + '<button class="btn-filter'+(showMine?'':' active')+'" onclick="Renderer._shareShowMine=false;Renderer._renderCurrentView()">全部阵容</button>'
+      + '<button class="btn-filter'+(showMine?' active':'')+'" onclick="Renderer._shareShowMine=true;Renderer._renderCurrentView()">👤 我的阵容</button>'
+      + '</div>';
 
     // 使用顶栏搜索框
     this._showSearch(true);
@@ -816,8 +832,15 @@ const Renderer = {
       + '<option value="cover"'+(this._shareSortBy==='cover'?' selected':'')+'>打击面最多</option>'
       + '<option value="resist"'+(this._shareSortBy==='resist'?' selected':'')+'>抵抗面最多</option>'
       + '</select>'
-      + '<span style="font-size:13px;color:var(--neutral-500)">共 '+filtered.length+' 套</span>'
+      + '<span style="font-size:13px;color:var(--neutral-500)">'+(showMine?'我的':'共 ')+filtered.length+' 套</span>'
       + '</div>';
+
+    // 我的阵容提示
+    if (showMine && !filtered.length) {
+      html += '<div class="empty-state">你还没发布过阵容<br><br><button class="btn" onclick="Router.go(\'pets\')">去配队</button></div>';
+      this._container.innerHTML = html;
+      return;
+    }
 
     html += '<div class="share-grid">';
     for (const entry of filtered) {
@@ -825,8 +848,9 @@ const Renderer = {
       const coverPct = entry.total_elements ? Math.round((entry.attack_count||0) / entry.total_elements * 100) : 0;
       const resistPct = entry.total_elements ? Math.round((entry.defense_count||0) / entry.total_elements * 100) : 0;
       const timeAgo = this._timeAgo(entry.created_at);
+      const isMine = entry.user_id === myId;
 
-      html += '<div class="share-card" onclick="Renderer._clickSharedTeam('+entry.id+')">'
+      html += '<div class="share-card'+(isMine?' share-card-mine':'')+'" onclick="Renderer._clickSharedTeam('+entry.id+')">'
         + '<div class="share-card-header"><div class="share-pet-row">';
       for (const p of pets) {
         html += '<div class="share-pet-mini" title="'+Utils.esc(p?.name||'')+'">'
@@ -857,6 +881,11 @@ const Renderer = {
           }
         }
         html += '</div>';
+      }
+      if (isMine) {
+        html += '<div style="display:flex;gap:6px;margin-top:6px">'
+          + '<button class="btn-sm" style="background:var(--danger-500)" onclick="event.stopPropagation();Renderer._deleteMyTeam('+entry.id+')">🗑 删除</button>'
+          + '</div>';
       }
       html += '</div>';
     }
@@ -935,6 +964,18 @@ const Renderer = {
     }).catch(() => {
       prompt('复制以下内容:', text);
     });
+  },
+
+  /** 删除我的阵容 */
+  async _deleteMyTeam(id) {
+    if (!confirm('确定删除这条阵容？')) return;
+    const ok = await SupabaseDB.deleteTeam(id, DeviceID.get());
+    if (ok) {
+      alert('✅ 已删除');
+      this._renderCurrentView();
+    } else {
+      alert('⚠️ 删除失败，可能不是你的阵容');
+    }
   },
 
   /** 点击阵容：记录+1（云端） */
@@ -1252,6 +1293,7 @@ const Renderer = {
     const coverage = this._calcTeamCoverage();
 
     const entry = {
+      user_id: DeviceID.get(),
       pet_names: this._team.map(p => p.name),
       elements: [...new Set(this._team.flatMap(p => p.element||[]))],
       skills: {},

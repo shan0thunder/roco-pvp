@@ -259,6 +259,7 @@ body {
 .share-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: var(--space-3); }
 .share-card { background: var(--white); border: 1px solid var(--neutral-200); border-radius: 12px; padding: var(--space-4); cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; }
 .share-card:hover { border-color: var(--primary-500); box-shadow: var(--shadow-md); }
+.share-card.share-card-mine { border-left: 3px solid var(--primary-500); }  /* 我的阵容左边标记 */
 .share-card-header { margin-bottom: var(--space-3); }
 .share-pet-row { display: flex; gap: 6px; flex-wrap: wrap; }
 .share-pet-mini { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 48px; }
