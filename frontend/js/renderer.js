@@ -28,7 +28,6 @@ const Renderer = {
   _skillIndex: null,  // 技能索引缓存
 
   // 阵容分享
-  _shareFilter: '',     // 搜索精灵名
   _shareSortBy: 'new',  // 排序: new|click|cover|resist
   _shareDialog: null,   // 分享弹窗DOM
 
@@ -38,6 +37,8 @@ const Renderer = {
   _dragSkillData: null,
   _dragSlotIdx: null,
   _searchKw: '',
+  _searchTimer: null,
+  _suggestionEl: null,
 
   init() {
     this._container = document.getElementById('mainContent');
@@ -58,7 +59,9 @@ const Renderer = {
 
     this._searchInput?.addEventListener('input', () => {
       this._searchKw = this._searchInput.value;
-      this._renderCurrentView();
+      this._searchTimer && clearTimeout(this._searchTimer);
+      this._searchTimer = setTimeout(() => this._renderCurrentView(), 300);
+      this._updateSearchSuggestions(this._searchInput.value);
     });
 
     document.addEventListener('click', () => {
@@ -587,7 +590,7 @@ const Renderer = {
 
     const elem = this._skillFilterElem || '';
     const cat = this._skillFilterCat || '';
-    const kw = (this._skillKw || '').toLowerCase();
+    const kw = this._searchKw?.toLowerCase() || '';
 
     let filtered = allSkills;
     if (elem) filtered = filtered.filter(s => (s.element||'') === elem);
@@ -616,11 +619,12 @@ const Renderer = {
     html += '</select>'
       + '</div></div>';
 
-    // 搜索
-    html += '<div class="search-bar" style="display:flex;margin:8px 0">'
-      + '<input type="text" placeholder="搜索技能名或效果..." value="'+Utils.esc(this._skillKw||'')+'" style="flex:1;padding:8px 14px;border:1px solid var(--neutral-200);border-radius:var(--radius);font-size:14px;outline:none" oninput="Renderer._skillKw=this.value;Renderer._renderCurrentView()">'
-      + '<span style="margin-left:8px;line-height:36px;font-size:13px;color:var(--neutral-500)">'+filtered.length+' 个技能</span>'
-      + '</div>';
+    // 使用顶栏搜索框
+    this._showSearch(true);
+    if (this._searchInput) {
+      this._searchInput.value = this._searchKw || '';
+      this._searchInput.setAttribute('placeholder', '搜索技能名或效果...');
+    }
 
     // 统计卡片
     html += '<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">'
@@ -765,7 +769,7 @@ const Renderer = {
     const petMap = {};
     for (const p of DataStore.pets) petMap[p.name] = p;
 
-    const kw = (this._shareFilter || '').toLowerCase();
+    const kw = (this._searchKw || '').toLowerCase();
     const sortField = this._shareSortBy === 'click' ? 'click_count'
       : this._shareSortBy === 'cover' ? 'attack_count'
       : this._shareSortBy === 'resist' ? 'defense_count'
@@ -793,8 +797,14 @@ const Renderer = {
 
     let html = '<div class="page-header"><h2>阵容分享</h2><p>查看玩家分享的PVP阵容，找到适合你的队伍</p></div>';
 
+    // 使用顶栏搜索框
+    this._showSearch(true);
+    if (this._searchInput) {
+      this._searchInput.value = this._searchKw || '';
+      this._searchInput.setAttribute('placeholder', '搜索精灵名...');
+    }
+
     html += '<div class="share-toolbar" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center">'
-      + '<input type="text" placeholder="搜索精灵名..." value="'+Utils.esc(this._shareFilter||'')+'" style="flex:1;min-width:160px;padding:8px 14px;border:1px solid var(--neutral-200);border-radius:var(--radius);font-size:14px;outline:none" oninput="Renderer._shareFilter=this.value;Renderer._renderCurrentView()">'
       + '<select class="filter-select" onchange="Renderer._shareSortBy=this.value;Renderer._renderCurrentView()">'
       + '<option value="new"'+(this._shareSortBy==='new'?' selected':'')+'>最新</option>'
       + '<option value="old"'+(this._shareSortBy==='old'?' selected':'')+'>最早</option>'
@@ -1517,6 +1527,60 @@ const Renderer = {
       searchEl.focus();
       searchEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
+  },
+
+  /** 搜索联想词 */
+  _updateSearchSuggestions(value) {
+    const { route } = Router.parse();
+    if (route !== 'pets' && route !== 'skills' && route !== 'share') return;
+
+    const old = document.getElementById('searchSuggestions');
+    if (old) old.remove();
+
+    if (!value || value.length < 1) return;
+
+    // 获取候选列表
+    let candidates = [];
+    if (route === 'pets') {
+      candidates = DataStore.pets.map(p => p.name).filter(n => n.includes(value));
+    } else if (route === 'skills') {
+      candidates = Object.keys(this._skillIndex?.byElement || {}).filter(e => e.includes(value));
+      if (!candidates.length) candidates = value ? ['搜索技能...'] : [];
+    } else if (route === 'share') {
+      return; // 分享页不联想
+    }
+
+    candidates = candidates.slice(0, 8);
+    if (!candidates.length) return;
+
+    const rect = this._searchInput?.getBoundingClientRect();
+    if (!rect) return;
+
+    const div = document.createElement('div');
+    div.id = 'searchSuggestions';
+    div.style.cssText = 'position:fixed;z-index:2000;top:'+(rect.bottom+4)+'px;left:'+rect.left+'px;width:'+rect.width+'px;background:var(--white);border:1px solid var(--neutral-200);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.12);max-height:200px;overflow-y:auto';
+
+    for (const c of candidates) {
+      const item = document.createElement('div');
+      item.style.cssText = 'padding:8px 14px;font-size:13px;cursor:pointer;border-bottom:1px solid var(--neutral-100)';
+      item.textContent = c;
+      item.onmouseover = () => item.style.background = 'var(--neutral-50)';
+      item.onmouseout = () => item.style.background = '';
+      item.onclick = () => {
+        this._searchKw = c;
+        if (this._searchInput) this._searchInput.value = c;
+        div.remove();
+        this._renderCurrentView();
+      };
+      div.appendChild(item);
+    }
+
+    // 关闭联想（点击外部）
+    document.addEventListener('click', function close(e) {
+      if (!div.contains(e.target)) { div.remove(); document.removeEventListener('click', close); }
+    });
+
+    document.body.appendChild(div);
   },
 
   /** 右键卡片菜单 */

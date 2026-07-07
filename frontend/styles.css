@@ -417,6 +417,13 @@ body {
   .sk-box { min-width: 100%; height: 120px; }
 }
 
+/* 搜索联想词下拉 */
+#searchSuggestions { background: var(--white); z-index:2000 }
+#searchSuggestions div:hover { background: var(--primary-50); }
+[data-theme="dark"] #searchSuggestions { background: var(--neutral-100); border-color: var(--neutral-200); }
+[data-theme="dark"] #searchSuggestions div { border-color: var(--neutral-200); }
+[data-theme="dark"] #searchSuggestions div:hover { background: var(--primary-50); }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition-duration: 0s !important; animation-duration: 0s !important; }
 }
