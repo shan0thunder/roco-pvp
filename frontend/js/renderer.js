@@ -56,7 +56,10 @@ const Renderer = {
       });
     });
 
-    this._searchInput?.addEventListener('input', () => { this._renderCurrentView(); });
+    this._searchInput?.addEventListener('input', () => {
+      this._searchKw = this._searchInput.value;
+      this._renderCurrentView();
+    });
 
     document.addEventListener('click', () => {
       document.querySelectorAll('.dropdown-menu.open').forEach(m => m.classList.remove('open'));
@@ -383,11 +386,9 @@ const Renderer = {
         + '</div>';
     }
 
-    // Search bar + filters
-    html += '<div class="search-bar" style="display:flex;margin-top:8px">'
-      + '<input type="text" id="inlineSearch" placeholder="搜索精灵名..." value="'+Utils.esc(kw)+'" style="flex:1;padding:8px 14px;border:1px solid var(--neutral-200);border-radius:var(--radius);font-size:14px;outline:none" oninput="Renderer._searchKw=this.value;Renderer._renderCurrentView()">'
-      + '<span class="search-count" id="searchCount" style="margin-left:8px;line-height:36px">'+DataStore.pets.length+' 只精灵</span>'
-      + '</div>';
+    // 显示顶栏搜索框（避免内联搜索重渲染丢焦点）
+    this._showSearch(true);
+    if (this._searchInput) this._searchInput.value = this._searchKw || '';
 
     const allElements = [...new Set(DataStore.pets.flatMap(p => p.element || []))].sort();
     if (!this._petFilterElem) this._petFilterElem = '';
