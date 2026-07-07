@@ -850,16 +850,29 @@ const Renderer = {
       const isMine = entry.user_id === myId;
 
       html += '<div class="share-card'+(isMine?' share-card-mine':'')+'" onclick="Renderer._clickSharedTeam('+entry.id+')">'
-        + '<div class="share-card-header"><div class="share-pet-row">';
-      for (const p of pets) {
+        // 队伍名
+        + (entry.team_name ? '<div class="share-team-name">'+Utils.esc(entry.team_name)+'</div>' : '')
+        // 上三只
+        + '<div class="share-card-header"><div class="share-pet-grid">'
+        + '<div class="share-pet-row3">';
+      for (let i = 0; i < 3 && i < pets.length; i++) {
+        const p = pets[i];
         html += '<div class="share-pet-mini" title="'+Utils.esc(p?.name||'')+'">'
           + (p?.image ? '<img src="'+Utils.esc(p.image)+'" alt="">' : '<span class="share-pet-initial">'+Utils.esc((p?.name||'?')[0])+'</span>')
           + '<span>'+Utils.truncate(p?.name||'',4)+'</span>'
           + '</div>';
       }
-      html += '</div><div class="share-elems">'
-        + (entry.elements||[]).map(e => '<span class="card-tag" style="background:'+Utils.elementColor(e)+';color:#fff">'+Utils.esc(e)+'</span>').join('')
-        + '</div></div>';
+      html += '</div>'
+        // 下三只
+        + '<div class="share-pet-row3">';
+      for (let i = 3; i < 6 && i < pets.length; i++) {
+        const p = pets[i];
+        html += '<div class="share-pet-mini" title="'+Utils.esc(p?.name||'')+'">'
+          + (p?.image ? '<img src="'+Utils.esc(p.image)+'" alt="">' : '<span class="share-pet-initial">'+Utils.esc((p?.name||'?')[0])+'</span>')
+          + '<span>'+Utils.truncate(p?.name||'',4)+'</span>'
+          + '</div>';
+      }
+      html += '</div></div>'
       if (entry.description) {
         html += '<div class="share-desc">'+Utils.esc(entry.description)+'</div>';
       }
