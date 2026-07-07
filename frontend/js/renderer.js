@@ -1268,9 +1268,8 @@ const Renderer = {
       entry.skills[i] = skills;
       if (this._petNature[i]) entry.natures[i] = this._petNature[i];
       if (this._teamWill[i]) entry.wills[i] = this._teamWill[i];
-      // 种族值选中暂不写入（需数据库加 stats 列后再开启）
-      // if (this._teamStats[i]?.length) entry.stats = entry.stats || {};
-      // if (this._teamStats[i]?.length) entry.stats[i] = this._teamStats[i];
+      if (this._teamStats[i]?.length) entry.stats = entry.stats || {};
+      if (this._teamStats[i]?.length) entry.stats[i] = this._teamStats[i];
     }
 
     const result = await SupabaseDB.publishTeam(entry);
