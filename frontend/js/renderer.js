@@ -358,7 +358,7 @@ const Renderer = {
         html += '<option value="'+key+'"'+(currentNature===key?' selected':'')+'>'+label+' ('+(st[key]??'-')+')</option>';
       }
       html += '</select>'
-        + (sp.description ? '<div class="sd-col-desc" style="font-size:11px;color:var(--neutral-500);line-height:1.5;padding:6px 4px;border-top:1px solid var(--neutral-100);margin-top:6px">'+Utils.esc(sp.description)+'</div>' : '')
+        + (sp.trait ? '<div class="sd-col-desc" style="font-size:11px;color:var(--neutral-500);line-height:1.5;padding:6px 4px;border-top:1px solid var(--neutral-100);margin-top:6px"><strong>'+Utils.esc(sp.trait.name)+'</strong><br>'+Utils.esc(sp.trait.desc)+'</div>' : '')
         + '</div>'
         + '<div class="sd-col sd-col-skills">'
         + '<div class="sd-col-title">技能</div>'
@@ -470,7 +470,7 @@ const Renderer = {
                   <div class="stat-item"><div class="label">魔防</div><div class="value">${st.magic_defense??'-'}</div></div>
                   <div class="stat-item"><div class="label">速度</div><div class="value">${st.speed??'-'}</div></div>
                 </div></div>
-                ${p.description ? '<div class="card-expand-desc">'+Utils.esc(p.description)+'</div>' : ''}
+                ${p.trait ? '<div class="card-expand-desc"><strong style="font-size:13px">特性：'+Utils.esc(p.trait.name)+'</strong><br>'+Utils.esc(p.trait.desc)+'</div>' : ''}
               </div>
             </div>
             <div class="card-expand-skills"><h5>技能池 (${(p.skills||[]).length})</h5>
