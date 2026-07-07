@@ -357,8 +357,9 @@ const Renderer = {
       for (const [key, label] of Object.entries(STAT_NAMES)) {
         html += '<option value="'+key+'"'+(currentNature===key?' selected':'')+'>'+label+' ('+(st[key]??'-')+')</option>';
       }
-      html += '</select></div>'
-        + (sp.description ? '<div class="sd-col-desc" style="font-size:11px;color:var(--neutral-500);line-height:1.5;padding:4px 0;border-bottom:1px solid var(--neutral-100);margin-bottom:4px">'+Utils.esc(sp.description)+'</div>' : '')
+      html += '</select>'
+        + (sp.description ? '<div class="sd-col-desc" style="font-size:11px;color:var(--neutral-500);line-height:1.5;padding:6px 4px;border-top:1px solid var(--neutral-100);margin-top:6px">'+Utils.esc(sp.description)+'</div>' : '')
+        + '</div>'
         + '<div class="sd-col sd-col-skills">'
         + '<div class="sd-col-title">技能</div>'
         + '<div class="skill-slot-grid"><div class="skill-slot-row">';
@@ -469,9 +470,9 @@ const Renderer = {
                   <div class="stat-item"><div class="label">魔防</div><div class="value">${st.magic_defense??'-'}</div></div>
                   <div class="stat-item"><div class="label">速度</div><div class="value">${st.speed??'-'}</div></div>
                 </div></div>
+                ${p.description ? '<div class="card-expand-desc">'+Utils.esc(p.description)+'</div>' : ''}
               </div>
             </div>
-            ${p.description ? '<div class="card-expand-desc">'+Utils.esc(p.description)+'</div>' : ''}
             <div class="card-expand-skills"><h5>技能池 (${(p.skills||[]).length})</h5>
               <div class="skills-scroll">
                 <table class="skill-table"><thead><tr><th>名称</th><th>系别</th><th>分类</th><th>能耗</th><th>威力</th><th>效果</th></tr></thead><tbody>${skillsList}</tbody></table>
