@@ -222,17 +222,19 @@ const Renderer = {
 
     html += '</div>';
 
-    if (isCollapsed && this._team.length > 0) {
-      // 折叠模式：精灵名文字显示
-      html += '<div class="builder-bar-row collapsed-slots" style="display:flex;flex-wrap:wrap;gap:4px;padding:4px 0">';
-      for (let i = 0; i < this._team.length; i++) {
-        const p = this._team[i];
-        if (!p) continue;
-        const elTags = (p.element||[]).map(e => '<span class="card-tag" style="background:'+Utils.elementColor(e)+';color:#fff;font-size:9px;padding:0 4px">'+Utils.esc(e)+'</span>').join('');
-        html += '<span style="cursor:pointer;font-size:13px;padding:2px 6px;border-radius:4px;background:var(--neutral-50);border:1px solid var(--neutral-200)" onclick="Renderer._showSlotDetail('+i+')">'
-          + Utils.esc(p.name)+' '+elTags+'</span>';
+    if (isCollapsed) {
+      // 折叠模式
+      if (this._team.length > 0) {
+        html += '<div class="builder-bar-row collapsed-slots" style="display:flex;flex-wrap:wrap;gap:4px;padding:4px 0">';
+        for (let i = 0; i < this._team.length; i++) {
+          const p = this._team[i];
+          if (!p) continue;
+          const elTags = (p.element||[]).map(e => '<span class="card-tag" style="background:'+Utils.elementColor(e)+';color:#fff;font-size:9px;padding:0 4px">'+Utils.esc(e)+'</span>').join('');
+          html += '<span style="cursor:pointer;font-size:13px;padding:2px 6px;border-radius:4px;background:var(--neutral-50);border:1px solid var(--neutral-200)" onclick="Renderer._showSlotDetail('+i+')">'
+            + Utils.esc(p.name)+' '+elTags+'</span>';
+        }
+        html += '</div>';
       }
-      html += '</div>';
     } else {
       // 展开模式：完整配队器
       html += '<div class="builder-bar-row toggle-row">'
