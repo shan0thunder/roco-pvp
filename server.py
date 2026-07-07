@@ -159,7 +159,7 @@ def check_data():
 def main():
     print()
     print("=" * 50)
-    print("  洛克王国世界PVP助手 - 开发服务器 v2")
+    print("  洛·世界PVP工具箱 - 开发服务器")
     print("=" * 50)
     print()
 
