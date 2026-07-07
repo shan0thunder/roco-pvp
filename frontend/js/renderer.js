@@ -283,6 +283,7 @@ const Renderer = {
       html += '</div>';
     }
     }  // 关闭展开模式 else 块
+    if (!isCollapsed) {
     html += '</div>'
       + '<div class="builder-bar-row analysis-row">';
     const analysisBlocks = [
@@ -316,6 +317,7 @@ const Renderer = {
         + '<div style="font-size:18px;font-weight:700;color:'+(overallScore>=70?'var(--success-500)':overallScore>=40?'var(--warning-500)':'var(--danger-500)')+'">'+overallScore+'</div>'
         + '<div style="font-size:9px;color:var(--neutral-500)">'+coverPct+'%打击面</div>'
         + '</div>';
+    }
     }
     if (!isCollapsed) {
       html += '</div></div>';  // 关闭analysis-row和builder-bar
