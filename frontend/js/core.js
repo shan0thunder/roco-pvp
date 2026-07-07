@@ -108,7 +108,7 @@ const SupabaseDB = (() => {
     const c = getClient();
     if (!c) return null;
     const { data, error } = await c.from('shared_teams').insert(entry).select();
-    if (error) { console.error('Supabase insert error:', error); return null; }
+    if (error) { console.error('Supabase insert error:', JSON.stringify(error)); return null; }
     return data?.[0] || null;
   }
 
