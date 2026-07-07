@@ -62,7 +62,7 @@ const DataStore = {
           // 尝试WebP（浏览器支持时自动使用）
           const webpPath = path.replace(/\.png$/i, '.webp');
           // 用WebP，如果404会自动降级（由CDN处理）
-          p.image = 'https://cdn.jsdelivr.net/gh/shan0thunder/roco-pvp@main/' + webpPath;
+          p.image = 'https://cdn.jsdelivr.net/gh/shan0thunder/roco-pvp@main/' + webpPath + '?v=2';
         }
       });
     }
