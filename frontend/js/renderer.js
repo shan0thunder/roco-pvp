@@ -213,7 +213,7 @@ const Renderer = {
       + '<div class="builder-bar-row title-row">'
       + '<span class="builder-bar-title">队伍 ('+this._team.length+'/6)</span>'
       + (this._team.length && isCollapsed ? '' : (this._team.length ? '<button class="btn-sm" onclick="Renderer._clearTeam();Renderer._renderCurrentView()">清空</button>' : ''))
-      + (!isCollapsed ? '<button class="btn-sm" style="margin-left:auto" onclick="Renderer._openShareDialog()" '+(this._isTeamComplete()?'':'disabled title=\'需填满6只精灵和全部技能格\'')+'>分享</button>' : '')
+      + (!isCollapsed ? '<button class="btn-sm" style="margin-left:auto" onclick="Renderer._openShareDialog()">分享</button>' : '')
       + (!isCollapsed ? '<button class="btn-sm" onclick="Renderer._exportTeam()">导出</button>' : '');
 
     // 折叠/展开按钮
@@ -1180,7 +1180,10 @@ const Renderer = {
 
   /** 打开分享弹窗 */
   _openShareDialog() {
-    if (!this._isTeamComplete()) return;
+    if (!this._isTeamComplete()) {
+      alert('请先填满6只精灵并给每只配好4个技能');
+      return;
+    }
     const old = document.getElementById('shareDialog');
     if (old) old.remove();
 
