@@ -113,6 +113,7 @@ body {
 .card-expand-right .stat-item { padding: 4px; background: var(--neutral-50); border-radius: 6px; text-align: center; }
 .card-expand-right .stat-item .label { font-size: 9px; color: var(--neutral-500); }
 .card-expand-right .stat-item .value { font-size: var(--text-sm); font-weight: 700; color: var(--primary-500); }
+.card-expand-desc { font-size:12px;color:var(--neutral-500);line-height:1.6;padding:4px 0 8px;border-top:1px solid var(--neutral-100);margin-top:4px; }
 .card-expand-skills { display: flex; flex-direction: column; flex: 1; min-height: 0; }
 .card-expand-skills h5 { font-size: var(--text-xs); font-weight: 600; margin-bottom: 2px; }
 .card-expand-skills .skills-scroll { flex: 1; min-height: 0; overflow-y: auto; border: 1px solid var(--neutral-200); border-radius: var(--radius); }
