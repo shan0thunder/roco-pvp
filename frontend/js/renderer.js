@@ -209,7 +209,7 @@ const Renderer = {
 
     // 折叠/展开按钮（右上角）
     if (this._team.length > 0) {
-      html += '<button class="btn-sm" style="margin-left:auto;font-weight:700;width:28px;height:28px;padding:0;display:flex;align-items:center;justify-content:center" onclick="Renderer._builderCollapsed=!Renderer._builderCollapsed;Renderer._renderCurrentView()">'+(isCollapsed?'+':'−')+'</button>';
+      html += '<button class="btn-sm" onclick="Renderer._builderCollapsed=!Renderer._builderCollapsed;Renderer._renderCurrentView()">'+(isCollapsed?'+ 展开':'− 折叠')+'</button>';
     }
 
     html += '</div>';
