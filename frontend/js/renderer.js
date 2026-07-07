@@ -34,6 +34,7 @@ const Renderer = {
 
   // 配队器筛选
   _builderFilter: null,
+  _builderCollapsed: false,
   _dragSkillData: null,
   _dragSlotIdx: null,
   _searchKw: '',
@@ -194,34 +195,57 @@ const Renderer = {
       if (!hasResist) noResist.push(atk);
     }
 
-    let html = '<div class="builder-bar">'
+    const isCollapsed = this._builderCollapsed;
+
+    let html = '<div class="builder-bar'+(isCollapsed?' collapsed':'')+'">'
       + '<div class="builder-bar-row title-row">'
       + '<span class="builder-bar-title">队伍 ('+this._team.length+'/6)</span>'
-      + (this._team.length ? '<button class="btn-sm" onclick="Renderer._clearTeam();Renderer._renderCurrentView()">清空</button>' : '')
-      + '<button class="btn-sm" style="margin-left:auto" onclick="Renderer._openShareDialog()" '+(this._isTeamComplete()?'':'disabled title=\'需填满6只精灵和全部技能格\'')+'>分享</button>'
-      + '<button class="btn-sm" onclick="Renderer._exportTeam()">导出</button>'
-      + '</div>'
-      + '<div class="builder-bar-row toggle-row">'
-      + '<button class="btn-filter'+(this._slotOptionMode==='will'?' active':'')+'" onclick="Renderer._slotOptionMode=Renderer._slotOptionMode===\'will\'?null:\'will\';Renderer._renderCurrentView()">愿力</button>'
-      + '<button class="btn-filter'+(this._slotOptionMode==='leader'?' active':'')+'" onclick="Renderer._slotOptionMode=Renderer._slotOptionMode===\'leader\'?null:\'leader\';Renderer._renderCurrentView()">首领化</button>'
-      + '</div>'
-      + '<div class="builder-bar-row slots-row">';
-    for (let i = 0; i < 6; i++) {
-      const p = this._team[i];
-      if (p) {
-        const elTags = (p.element||[]).map(e => '<span class="card-tag" style="background:'+Utils.elementColor(e)+';color:#fff">'+Utils.esc(e)+'</span>').join('');
-        html += '<div class="bar-slot filled" draggable="true" onclick="Renderer._showSlotDetail('+i+')" ondragstart="Renderer._dragSlotStart(event,'+i+')" ondragover="event.preventDefault()" ondrop="Renderer._dragSlotDrop(event,'+i+')">'
-          + (p.image ? '<img class="bar-slot-img" src="'+Utils.esc(p.image)+'" alt="">' : '')
-          + '<div class="bar-slot-name">'+Utils.esc(p.name)+'</div>'
-          + '<div class="bar-slot-elems">'+elTags+'</div>'
-          + '<button class="bar-slot-remove" onclick="event.stopPropagation();Renderer._removeFromTeam('+i+');Renderer._renderCurrentView()">−</button>'
-          + '</div>';
-      } else {
-        html += '<div class="bar-slot empty" onclick="Renderer._openPetSelector()"><span class="bar-slot-placeholder">+</span></div>';
-      }
+      + (this._team.length && isCollapsed ? '' : (this._team.length ? '<button class="btn-sm" onclick="Renderer._clearTeam();Renderer._renderCurrentView()">清空</button>' : ''))
+      + (!isCollapsed ? '<button class="btn-sm" style="margin-left:auto" onclick="Renderer._openShareDialog()" '+(this._isTeamComplete()?'':'disabled title=\'需填满6只精灵和全部技能格\'')+'>分享</button>' : '')
+      + (!isCollapsed ? '<button class="btn-sm" onclick="Renderer._exportTeam()">导出</button>' : '');
+
+    // 折叠/展开按钮
+    if (this._team.length > 0) {
+      html += '<button class="btn-filter" style="margin-left:4px;font-weight:700" onclick="Renderer._builderCollapsed=!Renderer._builderCollapsed;Renderer._renderCurrentView()">'+(isCollapsed?'+':'−')+'</button>';
     }
-    html += '</div>'
-      + '<div class="builder-bar-row config-row">';
+
+    html += '</div>';
+
+    if (isCollapsed && this._team.length > 0) {
+      // 折叠模式：精灵名文字显示
+      html += '<div class="builder-bar-row collapsed-slots" style="display:flex;flex-wrap:wrap;gap:4px;padding:4px 0">';
+      for (let i = 0; i < this._team.length; i++) {
+        const p = this._team[i];
+        if (!p) continue;
+        const elTags = (p.element||[]).map(e => '<span class="card-tag" style="background:'+Utils.elementColor(e)+';color:#fff;font-size:9px;padding:0 4px">'+Utils.esc(e)+'</span>').join('');
+        html += '<span style="cursor:pointer;font-size:13px;padding:2px 6px;border-radius:4px;background:var(--neutral-50);border:1px solid var(--neutral-200)" onclick="Renderer._showSlotDetail('+i+')">'
+          + Utils.esc(p.name)+' '+elTags+'</span>';
+      }
+      html += '</div>';
+    } else {
+      // 展开模式：完整配队器
+      html += '<div class="builder-bar-row toggle-row">'
+        + '<button class="btn-filter'+(this._slotOptionMode==='will'?' active':'')+'" onclick="Renderer._slotOptionMode=Renderer._slotOptionMode===\'will\'?null:\'will\';Renderer._renderCurrentView()">愿力</button>'
+        + '<button class="btn-filter'+(this._slotOptionMode==='leader'?' active':'')+'" onclick="Renderer._slotOptionMode=Renderer._slotOptionMode===\'leader\'?null:\'leader\';Renderer._renderCurrentView()">首领化</button>'
+        + '</div>'
+        + '<div class="builder-bar-row slots-row">';
+      for (let i = 0; i < 6; i++) {
+        const p = this._team[i];
+        if (p) {
+          const elTags = (p.element||[]).map(e => '<span class="card-tag" style="background:'+Utils.elementColor(e)+';color:#fff">'+Utils.esc(e)+'</span>').join('');
+          html += '<div class="bar-slot filled" draggable="true" onclick="Renderer._showSlotDetail('+i+')" ondragstart="Renderer._dragSlotStart(event,'+i+')" ondragover="event.preventDefault()" ondrop="Renderer._dragSlotDrop(event,'+i+')">'
+            + (p.image ? '<img class="bar-slot-img" src="'+Utils.esc(p.image)+'" alt="">' : '')
+            + '<div class="bar-slot-name">'+Utils.esc(p.name)+'</div>'
+            + '<div class="bar-slot-elems">'+elTags+'</div>'
+            + '<button class="bar-slot-remove" onclick="event.stopPropagation();Renderer._removeFromTeam('+i+');Renderer._renderCurrentView()">−</button>'
+            + '</div>';
+        } else {
+          html += '<div class="bar-slot empty" onclick="Renderer._openPetSelector()"><span class="bar-slot-placeholder">+</span></div>';
+        }
+      }
+      html += '</div>'
+        + '<div class="builder-bar-row config-row">'
+
     for (let i = 0; i < 6; i++) {
       const p = this._team[i];
       html += '<div class="bar-config-cell">';
@@ -245,6 +269,7 @@ const Renderer = {
       }
       html += '</div>';
     }
+    }  // 关闭展开模式 else 块
     html += '</div>'
       + '<div class="builder-bar-row analysis-row">';
     const analysisBlocks = [
@@ -279,7 +304,11 @@ const Renderer = {
         + '<div style="font-size:9px;color:var(--neutral-500)">'+coverPct+'%打击面</div>'
         + '</div>';
     }
-    html += '</div></div>';
+    if (!isCollapsed) {
+      html += '</div></div>';  // 关闭analysis-row和builder-bar
+    } else {
+      html += '</div>';  // 折叠模式只需关闭builder-bar
+    }
 
     // Slot detail panel
     if (this._selectedSlot != null && this._team[this._selectedSlot]) {
@@ -899,6 +928,39 @@ const Renderer = {
     this._showSharedTeamDetail(id);
   },
 
+  /** 从分享阵容导入到配队器 */
+  async _importTeamToBuilder(id) {
+    const teams = await this._getSharedTeams('created_at');
+    const entry = teams.find(t => t.id === id);
+    if (!entry) return;
+
+    const pets = DataStore.pets;
+    const names = entry.pet_names || [];
+    this._team = names.map(n => pets.find(p => p.name === n)).filter(Boolean);
+    this._teamSkills = {};
+    this._teamWill = {};
+    this._teamLeader = {};
+    this._petNature = {};
+    this._teamStats = {};
+    this._builderCollapsed = false;
+    this._selectedSlot = null;
+
+    // 恢复配招/性格/愿力
+    for (let i = 0; i < this._team.length; i++) {
+      const sk = entry.skills?.[i] || [];
+      const petSkills = this._team[i]?.skills || [];
+      this._teamSkills[i] = sk.map(sname => petSkills.find(s => s.name === sname)).filter(Boolean);
+      while (this._teamSkills[i].length < 4) this._teamSkills[i].push(null);
+      if (entry.natures?.[i]) this._petNature[i] = entry.natures[i];
+      if (entry.wills?.[i]) this._teamWill[i] = entry.wills[i];
+      if (entry.stats?.[i]) this._teamStats[i] = entry.stats[i];
+    }
+
+    this._saveTeamSnapshot();
+    Router.go('pets');
+    this._renderCurrentView();
+  },
+
   /** 显示分享阵容详情弹窗 */
   async _showSharedTeamDetail(id) {
     const teams = await this._getSharedTeams('created_at');
@@ -950,8 +1012,10 @@ const Renderer = {
         + '</div></div></div>';
     }
     inner += '</div>'
-      + '<button class="btn" style="margin-top:12px" onclick="this.closest(\'.share-detail-overlay\').remove()">关闭</button>'
-      + '</div>';
+      + '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">'
+      + '<button class="btn-filter" onclick="Renderer._importTeamToBuilder('+entry.id+');this.closest(\'.share-detail-overlay\').remove()">📥 导入配队器</button>'
+      + '<button class="btn" onclick="this.closest(\'.share-detail-overlay\').remove()">关闭</button>'
+      + '</div></div>';
 
     div.innerHTML = inner;
     document.body.appendChild(div);
