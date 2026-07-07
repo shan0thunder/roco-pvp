@@ -811,9 +811,12 @@ const Renderer = {
       + '</p></div>';
 
     // 标签栏
-    html += '<div class="filter-row" style="margin-bottom:12px">'
+    html += '<div class="filter-row" style="margin-bottom:4px">'
       + '<button class="btn-filter'+(showMine?'':' active')+'" onclick="Renderer._shareShowMine=false;Renderer._renderCurrentView()">全部阵容</button>'
       + '<button class="btn-filter'+(showMine?' active':'')+'" onclick="Renderer._shareShowMine=true;Renderer._renderCurrentView()">👤 我的阵容</button>'
+      + '</div>'
+      + '<div style="font-size:11px;color:var(--neutral-500);margin-bottom:12px;line-height:1.5">'
+      + '「我的阵容」基于浏览器本地标识识别，只有你能看到和管理自己的发布。清空浏览器数据后标识丢失，但已发布的阵容仍在。'
       + '</div>';
 
     // 使用顶栏搜索框
