@@ -881,7 +881,7 @@ const Renderer = {
         + '<span class="share-stat" title="抵抗面覆盖">🛡 '+resistPct+'%</span>'
         + '<span class="share-stat" title="查看次数">👁 '+(entry.click_count||0)+'</span>'
         + '<span class="share-stat" title="分享时间">🕐 '+timeAgo+'</span>'
-        + '<span class="share-stat" style="font-size:9px;color:var(--neutral-200)">#'+entry.id+'</span>'
+        + '<span class="share-stat" style="font-size:9px;color:var(--neutral-500);font-weight:600">#'+entry.id+'</span>'
         + '</div>';
       const hasSkills = Object.keys(entry.skills||{}).length > 0;
       if (hasSkills) {
@@ -1063,7 +1063,7 @@ const Renderer = {
     const resistPct = entry.total_elements ? Math.round((entry.defense_count||0)/entry.total_elements*100) : 0;
     inner += '<div style="font-size:12px;color:var(--neutral-500);margin:8px 0">'
       + '打击面 '+coverPct+'% ｜ 抵抗面 '+resistPct+'% ｜ 👁 '+(entry.click_count||0)+' 次查看</div>'
-      + '<div style="font-size:10px;color:var(--neutral-200);text-align:right;margin-top:-4px">ID: '+entry.id+'</div>';
+      + '<div style="font-size:10px;color:var(--neutral-500);font-weight:600;text-align:right;margin-top:-4px">ID: '+entry.id+'</div>';
 
     inner += '<div class="share-detail-pets">';
     for (let i = 0; i < (entry.pet_names||[]).length; i++) {
