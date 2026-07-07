@@ -807,7 +807,7 @@ const Renderer = {
 
     let html = '<div class="page-header"><h2>阵容分享</h2>'
       + '<p>查看玩家分享的PVP阵容，找到适合你的队伍'
-      + ' <span class="info-icon" title="你的设备会记住你发布的阵容，只有你能管理。清空浏览器数据后标识丢失，但已发布的阵容仍在。">i</span>'
+      + ' <span class="info-icon" title="无需登录，基于浏览器本地标识识别。换电脑/重装/清缓存会导致标识丢失，无法管理旧阵容。">i</span>'
       + '</p></div>';
 
     // 标签栏
@@ -816,7 +816,7 @@ const Renderer = {
       + '<button class="btn-filter'+(showMine?' active':'')+'" onclick="Renderer._shareShowMine=true;Renderer._renderCurrentView()">👤 我的阵容</button>'
       + '</div>'
       + '<div style="font-size:11px;color:var(--neutral-500);margin-bottom:12px;line-height:1.5">'
-      + '「我的阵容」基于浏览器本地标识识别，只有你能看到和管理自己的发布。清空浏览器数据后标识丢失，但已发布的阵容仍在。'
+      + '「我的阵容」基于浏览器本地标识识别，无需登录。换电脑、重装系统、手动清除浏览器缓存(历史记录/Cookie/存储)会导致标识丢失，无法管理旧阵容，但已发布的阵容仍在。'
       + '</div>';
 
     // 使用顶栏搜索框
