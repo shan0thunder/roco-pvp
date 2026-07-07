@@ -774,6 +774,8 @@ const Renderer = {
     const petMap = {};
     for (const p of DataStore.pets) petMap[p.name] = p;
 
+    const myId = DeviceID.get();
+    const showMine = this._shareShowMine;
     const kw = (this._searchKw || '').toLowerCase();
     const sortField = this._shareSortBy === 'click' ? 'click_count'
       : this._shareSortBy === 'cover' ? 'attack_count'
@@ -802,9 +804,6 @@ const Renderer = {
         (t.description||'').includes(kw)
       );
     }
-
-    const myId = DeviceID.get();
-    const showMine = this._shareShowMine;
 
     let html = '<div class="page-header"><h2>阵容分享</h2>'
       + '<p>查看玩家分享的PVP阵容，找到适合你的队伍'
