@@ -38,7 +38,7 @@ const Renderer = {
   _dragSlotIdx: null,
   _searchKw: '',
   _searchTimer: null,
-  _suggestionEl: null,
+  _searchComposing: false,  // IME输入法组合中
 
   init() {
     this._container = document.getElementById('mainContent');
@@ -57,11 +57,17 @@ const Renderer = {
       });
     });
 
+    // 搜索输入：IME兼容（composition期间不触发重渲染）
+    this._searchInput?.addEventListener('compositionstart', () => { this._searchComposing = true; });
+    this._searchInput?.addEventListener('compositionend', () => {
+      this._searchComposing = false;
+      this._onSearchInput();
+    });
     this._searchInput?.addEventListener('input', () => {
       this._searchKw = this._searchInput.value;
-      this._searchTimer && clearTimeout(this._searchTimer);
-      this._searchTimer = setTimeout(() => this._renderCurrentView(), 300);
-      this._updateSearchSuggestions(this._searchInput.value);
+      if (!this._searchComposing) {
+        this._onSearchInput();
+      }
     });
 
     document.addEventListener('click', () => {
@@ -1525,6 +1531,28 @@ const Renderer = {
       searchEl.focus();
       searchEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
+  },
+
+  /** 搜索输入处理（防抖+联想） */
+  _onSearchInput() {
+    // 更新联想词（不重渲染，安全）
+    this._updateSearchSuggestions(this._searchKw);
+
+    // 防抖重渲染
+    this._searchTimer && clearTimeout(this._searchTimer);
+    this._searchTimer = setTimeout(() => {
+      // 重渲染前恢复搜索框焦点（用requestAnimationFrame确保DOM重建后重新聚焦）
+      this._renderCurrentView();
+      requestAnimationFrame(() => {
+        if (this._searchInput) {
+          this._searchInput.value = this._searchKw;
+          this._searchInput.focus();
+          // 将光标移到末尾
+          const len = this._searchInput.value.length;
+          this._searchInput.setSelectionRange(len, len);
+        }
+      });
+    }, 400);
   },
 
   /** 搜索联想词 */
