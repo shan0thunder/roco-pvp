@@ -1607,13 +1607,12 @@ const Renderer = {
     if (!DataStore._data) return '';
     const chart = DataStore.typeChart || {};
     const allElems = DataStore.elements || [];
+    // 该属性攻击时克制谁
     const attackRow = chart[elem] || {};
     const strong = allElems.filter(e => attackRow[e] >= 2);
-    const weak = allElems.filter(e => attackRow[e] > 0 && attackRow[e] < 1);
-    const immune = allElems.filter(e => attackRow[e] <= 0);
+    const weakAtk = allElems.filter(e => attackRow[e] > 0 && attackRow[e] < 1);
     let text = '克制: ' + (strong.length ? strong.join(', ') : '无');
-    if (weak.length) text += '\n被抗: ' + weak.join(', ');
-    if (immune.length) text += '\n免疫: ' + immune.join(', ');
+    if (weakAtk.length) text += '\n被克: ' + weakAtk.join(', ');
     return text;
   },
 
