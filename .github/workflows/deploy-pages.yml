@@ -29,10 +29,16 @@ jobs:
         run: |
           mkdir -p _site
           cp -r frontend/* _site/
-          cp -r data _site/
+          mkdir -p _site/data
+          cp -r data/product _site/data/
+          cp -r data/images _site/data/
+          cp data/type_chart.json _site/data/ 2>/dev/null || true
+          cp data/skill_index.json _site/data/ 2>/dev/null || true
+          cp data/pay-good.jpg _site/data/ 2>/dev/null || true
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: "_site"
+          retention-days: 1
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
