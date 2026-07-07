@@ -816,7 +816,7 @@ const Renderer = {
       + '<button class="btn-filter'+(showMine?' active':'')+'" onclick="Renderer._shareShowMine=true;Renderer._renderCurrentView()">👤 我的阵容</button>'
       + '</div>'
       + '<div style="font-size:11px;color:var(--neutral-500);margin-bottom:12px;line-height:1.5">'
-      + '「我的阵容」基于浏览器本地标识识别，无需登录。换电脑、重装系统、手动清除浏览器缓存(历史记录/Cookie/存储)会导致标识丢失，无法管理旧阵容，但已发布的阵容仍在。'
+      + '「我的阵容」基于浏览器本地标识识别，无需登录。换电脑、重装系统、手动清除浏览器缓存(历史记录/Cookie/存储)会导致标识丢失，无法管理旧阵容，但已发布的阵容仍在。如需修改已发布的阵容，可记下阵容ID联系开发者。'
       + '</div>';
 
     // 使用顶栏搜索框
@@ -881,6 +881,7 @@ const Renderer = {
         + '<span class="share-stat" title="抵抗面覆盖">🛡 '+resistPct+'%</span>'
         + '<span class="share-stat" title="查看次数">👁 '+(entry.click_count||0)+'</span>'
         + '<span class="share-stat" title="分享时间">🕐 '+timeAgo+'</span>'
+        + '<span class="share-stat" style="font-size:9px;color:var(--neutral-200)">#'+entry.id+'</span>'
         + '</div>';
       const hasSkills = Object.keys(entry.skills||{}).length > 0;
       if (hasSkills) {
@@ -1061,7 +1062,8 @@ const Renderer = {
     const coverPct = entry.total_elements ? Math.round((entry.attack_count||0)/entry.total_elements*100) : 0;
     const resistPct = entry.total_elements ? Math.round((entry.defense_count||0)/entry.total_elements*100) : 0;
     inner += '<div style="font-size:12px;color:var(--neutral-500);margin:8px 0">'
-      + '打击面 '+coverPct+'% ｜ 抵抗面 '+resistPct+'% ｜ 👁 '+(entry.click_count||0)+' 次查看</div>';
+      + '打击面 '+coverPct+'% ｜ 抵抗面 '+resistPct+'% ｜ 👁 '+(entry.click_count||0)+' 次查看</div>'
+      + '<div style="font-size:10px;color:var(--neutral-200);text-align:right;margin-top:-4px">ID: '+entry.id+'</div>';
 
     inner += '<div class="share-detail-pets">';
     for (let i = 0; i < (entry.pet_names||[]).length; i++) {
