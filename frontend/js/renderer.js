@@ -1181,33 +1181,75 @@ const Renderer = {
   /** 打开分享弹窗 */
   _openShareDialog() {
     if (!this._isTeamComplete()) return;
-    // 移除旧弹窗
     const old = document.getElementById('shareDialog');
     if (old) old.remove();
+
+    const coverage = this._calcTeamCoverage();
+    const savedName = localStorage.getItem('pvp_team_draft_name') || '';
+    const savedDesc = localStorage.getItem('pvp_team_draft_desc') || '';
+
+    // 构建6只精灵的卡片HTML
+    let petsHtml = '';
+    for (let i = 0; i < 6; i++) {
+      const p = this._team[i];
+      if (!p) continue;
+      const elTags = (p.element||[]).map(e => '<span class="card-tag" style="background:'+Utils.elementColor(e)+';color:#fff;font-size:9px">'+e+'</span>').join('');
+      const skills = this._teamSkills[i] || [null,null,null,null];
+      const skillHtml = skills.map(s => s ? '<span style="font-size:10px;padding:1px 4px;background:var(--primary-50);border-radius:4px">'+Utils.esc(s.name)+'</span>' : '<span style="font-size:10px;color:var(--neutral-200)">—</span>').join('');
+
+      petsHtml += '<div class="share-card-pet" onclick="Renderer._showSlotDetail('+i+');document.getElementById(\'shareDialog\').remove()">'
+        + (p.image ? '<img src="'+Utils.esc(p.image)+'" style="width:48px;height:48px;object-fit:contain;border-radius:6px;background:var(--neutral-50)">' : '')
+        + '<div style="flex:1;min-width:0">'
+        + '<div style="font-size:13px;font-weight:600">'+Utils.esc(p.name)+'</div>'
+        + '<div style="font-size:10px;color:var(--neutral-500)">'+elTags+'</div>'
+        + '<div style="display:flex;gap:2px;margin-top:2px;flex-wrap:wrap">'+skillHtml+'</div>'
+        + '</div></div>';
+    }
+
+    const coverPct = coverage.totalElements ? Math.round(coverage.attackCount/coverage.totalElements*100) : 0;
+    const resistPct = coverage.totalElements ? Math.round(coverage.defenseCount/coverage.totalElements*100) : 0;
 
     const div = document.createElement('div');
     div.id = 'shareDialog';
     div.className = 'share-dialog-overlay';
-    const coverage = this._calcTeamCoverage();
-    div.innerHTML = '<div class="share-dialog">'
-      + '<h3>分享阵容</h3>'
-      + '<textarea id="shareDesc" placeholder="添加阵容说明（玩法思路、适用段位等）" style="width:100%;min-height:80px;padding:8px;border:1px solid var(--neutral-200);border-radius:var(--radius);font-size:13px;resize:vertical"></textarea>'
-      + '<div style="font-size:12px;color:var(--neutral-500);margin:8px 0">打击面 '+coverage.attackCount+'/'+coverage.totalElements+' ｜ 抵抗面 '+coverage.defenseCount+'/'+coverage.totalElements+'</div>'
-      + '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">'
-      + '<button class="btn-filter" onclick="document.getElementById(\'shareDialog\').remove()">取消</button>'
-      + '<button class="btn" onclick="Renderer._doShareTeam()">发布</button>'
+    div.innerHTML = '<div class="share-card-dialog">'
+      + '<div class="share-card-section">'
+      + '<input id="shareTeamName" class="share-name-input" placeholder="队伍名（选填，最多15字）" maxlength="15" value="'+Utils.esc(savedName)+'">'
+      + '</div>'
+      + '<div class="share-card-section share-card-pets">'
+      + '<div style="font-size:11px;color:var(--neutral-500);margin-bottom:6px">点击精灵可修改配招</div>'
+      + petsHtml
+      + '</div>'
+      + '<div class="share-card-section">'
+      + '<div style="font-size:12px;color:var(--neutral-500);margin-bottom:4px">打击面 '+coverPct+'% ｜ 抵抗面 '+resistPct+'%</div>'
+      + '<textarea id="shareDesc" class="share-desc-input" placeholder="队伍描述：玩法思路、适用段位、克制关系等">'+Utils.esc(savedDesc)+'</textarea>'
+      + '</div>'
+      + '<div class="share-card-section share-card-actions">'
+      + '<button class="btn-filter" onclick="Renderer._saveShareDraft()">💾 保存草稿</button>'
+      + '<button class="btn" onclick="Renderer._doShareTeam()">📤 确认分享</button>'
       + '</div></div>';
     document.body.appendChild(div);
   },
 
-  /** 执行分享（发布到Supabase） */
+  /** 保存草稿 */
+  _saveShareDraft() {
+    const nameEl = document.getElementById('shareTeamName');
+    const descEl = document.getElementById('shareDesc');
+    localStorage.setItem('pvp_team_draft_name', nameEl?.value || '');
+    localStorage.setItem('pvp_team_draft_desc', descEl?.value || '');
+    alert('✅ 草稿已保存');
+  },
+
   async _doShareTeam() {
     if (!this._isTeamComplete()) return;
+    const nameEl = document.getElementById('shareTeamName');
     const descEl = document.getElementById('shareDesc');
+    const teamName = nameEl ? nameEl.value.trim() : '';
     const description = descEl ? descEl.value.trim() : '';
     const coverage = this._calcTeamCoverage();
 
     const entry = {
+      team_name: teamName || '未命名队伍',
       pet_names: this._team.map(p => p.name),
       elements: [...new Set(this._team.flatMap(p => p.element||[]))],
       skills: {},
@@ -1232,6 +1274,9 @@ const Renderer = {
     const dialog = document.getElementById('shareDialog');
     if (dialog) dialog.remove();
 
+    // 清除草稿
+    localStorage.removeItem('pvp_team_draft_name');
+    localStorage.removeItem('pvp_team_draft_desc');
     if (result) {
       alert('✅ 阵容已发布到云端！所有用户可见');
     } else {
