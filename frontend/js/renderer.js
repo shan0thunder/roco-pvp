@@ -1249,7 +1249,6 @@ const Renderer = {
     const coverage = this._calcTeamCoverage();
 
     const entry = {
-      team_name: teamName || '未命名队伍',
       pet_names: this._team.map(p => p.name),
       elements: [...new Set(this._team.flatMap(p => p.element||[]))],
       skills: {},
