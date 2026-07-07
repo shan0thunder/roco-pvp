@@ -850,9 +850,7 @@ const Renderer = {
       const isMine = entry.user_id === myId;
 
       html += '<div class="share-card'+(isMine?' share-card-mine':'')+'" onclick="Renderer._clickSharedTeam('+entry.id+')">'
-        // 队伍名
         + (entry.team_name ? '<div class="share-team-name">'+Utils.esc(entry.team_name)+'</div>' : '')
-        // 上三只
         + '<div class="share-card-header"><div class="share-pet-grid">'
         + '<div class="share-pet-row3">';
       for (let i = 0; i < 3 && i < pets.length; i++) {
@@ -863,7 +861,6 @@ const Renderer = {
           + '</div>';
       }
       html += '</div>'
-        // 下三只
         + '<div class="share-pet-row3">';
       for (let i = 3; i < 6 && i < pets.length; i++) {
         const p = pets[i];
