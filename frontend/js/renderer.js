@@ -204,9 +204,9 @@ const Renderer = {
       + (!isCollapsed ? '<button class="btn-sm" style="margin-left:auto" onclick="Renderer._openShareDialog()" '+(this._isTeamComplete()?'':'disabled title=\'需填满6只精灵和全部技能格\'')+'>分享</button>' : '')
       + (!isCollapsed ? '<button class="btn-sm" onclick="Renderer._exportTeam()">导出</button>' : '');
 
-    // 折叠/展开按钮
+    // 折叠/展开按钮（右上角）
     if (this._team.length > 0) {
-      html += '<button class="btn-filter" style="margin-left:4px;font-weight:700" onclick="Renderer._builderCollapsed=!Renderer._builderCollapsed;Renderer._renderCurrentView()">'+(isCollapsed?'+':'−')+'</button>';
+      html += '<button class="btn-sm" style="margin-left:auto;font-weight:700;width:28px;height:28px;padding:0;display:flex;align-items:center;justify-content:center" onclick="Renderer._builderCollapsed=!Renderer._builderCollapsed;Renderer._renderCurrentView()">'+(isCollapsed?'+':'−')+'</button>';
     }
 
     html += '</div>';
