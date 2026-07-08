@@ -674,12 +674,20 @@ const Renderer = {
 
     const elem = this._skillFilterElem || '';
     const cat = this._skillFilterCat || '';
+    const cost = this._skillCostFilter;
+    const func = this._skillFuncFilter || '';
+    const sortBy = this._skillSortBy || '';
     const kw = this._searchKw?.toLowerCase() || '';
+    const expanded = this._skillExpanded;
 
     let filtered = allSkills;
     if (elem) filtered = filtered.filter(s => (s.element||'') === elem);
     if (cat) filtered = filtered.filter(s => (s.category||'') === cat);
+    if (cost !== null && cost !== undefined && cost !== '') filtered = filtered.filter(s => s.cost === Number(cost));
+    if (func) filtered = filtered.filter(s => ((s.effect||'')+(s.name||'')).includes(func));
     if (kw) filtered = filtered.filter(s => s.name.includes(kw) || (s.effect||'').includes(kw));
+    if (sortBy === 'power_desc') filtered.sort((a,b) => (b.power||0)-(a.power||0));
+    if (sortBy === 'power_asc') filtered.sort((a,b) => (a.power||0)-(b.power||0));
 
     const allElements = [...new Set(allSkills.map(s => s.element).filter(Boolean))].sort();
     const allCats = [...new Set(allSkills.map(s => s.category).filter(Boolean))].sort();
@@ -702,6 +710,31 @@ const Renderer = {
     }
     html += '</select>'
       + '</div></div>';
+    // 能耗+功能+排序
+    html += '<div class="filter-row" style="margin-bottom:8px;flex-wrap:wrap">'
+      + '<select class="filter-select" onchange="Renderer._skillCostFilter=this.value||null;Renderer._renderCurrentView()">'
+      + '<option value="">能耗</option>';
+    for (let c=0;c<=10;c++) {
+      html += '<option value="'+c+'"'+(cost===c?' selected':'')+'>'+c+'费</option>';
+    }
+      html += '</select>'
+      + '<select class="filter-select" onchange="Renderer._skillFuncFilter=this.value;Renderer._renderCurrentView()">'
+      + '<option value="">功能</option>'
+      + '<option value="清强化"'+(func==='清强化'?' selected':'')+'>清强化</option>'
+      + '<option value="印记"'+(func==='印记'?' selected':'')+'>印记</option>'
+      + '<option value="清印记"'+(func==='清印记'?' selected':'')+'>清印记</option>'
+      + '<option value="回血"'+(func==='回血'?' selected':'')+'>回血</option>'
+      + '<option value="护盾"'+(func==='护盾'?' selected':'')+'>护盾</option>'
+      + '<option value="先手"'+(func==='先手'?' selected':'')+'>先手</option>'
+      + '</select>'
+      + '<select class="filter-select" onchange="Renderer._skillSortBy=this.value;Renderer._renderCurrentView()">'
+      + '<option value="">排序</option>'
+      + '<option value="power_desc"'+(sortBy==='power_desc'?' selected':'')+'>威力⬇</option>'
+      + '<option value="power_asc"'+(sortBy==='power_asc'?' selected':'')+'>威力⬆</option>'
+      + '</select>'
+      + '<span style="font-size:13px;color:var(--neutral-500);line-height:32px">'+filtered.length+'/'+allSkills.length+'</span>'
+      + '</div>';
+    
 
     // 使用顶栏搜索框
     this._showSearch(true);
@@ -727,21 +760,28 @@ const Renderer = {
       const petNames = petsWith.slice(0, 4).map(n => Utils.esc(n)).join(', ');
       const more = petsWith.length > 4 ? `…等${petsWith.length}只` : '';
 
-      html += '<tr class="skill-row">'
+      const isExpanded = expanded === s.name;
+      html += '<tr class="skill-row'+(isExpanded?' expanded':'')+'" onclick="Renderer._toggleSkillExpand(\''+Utils.esc(s.name)+'\')">'
         + '<td><strong>'+Utils.esc(s.name)+'</strong></td>'
-        + '<td><span class="card-tag" style="background:'+Utils.elementColor(s.element)+';color:#fff">'+Utils.esc(s.element||'-')+'</span></td>'
+        + '<td><span class="card-tag" style="background:'+Utils.elementColor(s.element)+';color:#fff;font-size:10px">'+Utils.esc(s.element||'-')+'</span></td>'
         + '<td>'+Utils.esc(s.category||'-')+'</td>'
         + '<td>'+(s.cost!=null?s.cost:'-')+'</td>'
         + '<td>'+(s.power!=null?s.power:'-')+'</td>'
-        + '<td class="skill-effect" style="max-width:300px">'+Utils.esc((s.effect||'').slice(0,60))+'</td>'
+        + '<td class="skill-effect" style="max-width:300px">'+Utils.esc((s.effect||'').slice(0,60))+' <span style="font-size:10px;color:var(--neutral-300)">'+(isExpanded?'▲':'▼')+'</span></td>'
         + '<td style="font-size:12px;color:var(--neutral-500)">'+petNames+'<span style="color:var(--primary-500)">'+more+'</span></td>'
-        + '</tr>';
+        + '</tr>'
+        + (isExpanded ? '<tr class="skill-pets-row"><td colspan="7"><div style="display:flex;flex-wrap:wrap;gap:4px;padding:8px;background:var(--neutral-50)">'+(petsWith.length ? petsWith.map(pn => '<span class="skill-pet-link" onclick="event.stopPropagation();Router.go(\'pet\',\''+Utils.esc(pn)+'\');Renderer._renderCurrentView()" style="padding:2px 8px;border-radius:4px;border:1px solid var(--neutral-200);cursor:pointer;font-size:12px">'+Utils.esc(pn)+'</span>').join('') : '<span style="font-size:12px;color:var(--neutral-500)">暂无</span>')+'</div></td></tr>' : '');
     }
 
     html += '</tbody></table></div>';
     if (!filtered.length) html += '<div class="empty-state">未找到匹配的技能</div>';
 
     this._container.innerHTML = html;
+  },
+
+  _toggleSkillExpand(name) {
+    this._skillExpanded = this._skillExpanded === name ? null : name;
+    this._renderCurrentView();
   },
 
   /** 确保技能索引已加载 */
