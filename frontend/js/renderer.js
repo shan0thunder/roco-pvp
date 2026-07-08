@@ -669,12 +669,16 @@ const Renderer = {
     if (!this._stoneMap) {
       try { const r = await fetch('data/skill_stone_sources.json'); if (r.ok) this._stoneMap = await r.json(); } catch(e) {}
     }
+    if (!this._skillIcons) {
+      try { const r = await fetch('data/skill_icons.json'); if (r.ok) this._skillIcons = (await r.json()).icons || {}; } catch(e) {}
+    }
 
     const allSkills = this._skillIndex?.allSkills || [];
     const byElem = this._skillIndex?.byElement || {};
     const byCat = this._skillIndex?.byCategory || {};
     const skillToPets = this._skillIndex?.skillToPets || {};
     const stoneMap = this._stoneMap || {};
+    const skillIcons = this._skillIcons || {};
 
     const elem = this._skillFilterElem || '';
     const cat = this._skillFilterCat || '';
@@ -733,7 +737,7 @@ const Renderer = {
 
     // 技能表格
     html += '<div style="overflow-x:auto"><table class="skill-table" style="font-size:13px"><thead><tr>'
-      + '<th>名称</th><th>属性</th><th>分类</th><th>能耗</th><th>威力</th><th>效果</th><th>使用精灵</th><th>来源</th>'
+      + '<th style="width:24px"></th><th>名称</th><th>属性</th><th>分类</th><th>能耗</th><th>威力</th><th>效果</th><th>使用精灵</th><th>来源</th>'
       + '</tr></thead><tbody>';
 
     for (const s of filtered) {
@@ -743,7 +747,8 @@ const Renderer = {
 
       const isExpanded = expanded === s.name;
       html += '<tr class="skill-row'+(isExpanded?' expanded':'')+'" onclick="Renderer._toggleSkillExpand(\''+Utils.esc(s.name)+'\')">'
-        + '<td><strong>'+Utils.esc(s.name)+'</strong></td>'
+        + '<td style="padding:4px">'+(skillIcons[s.name] ? '<img src="'+skillIcons[s.name]+'" style="width:32px;height:32px;object-fit:contain;display:block" alt="" loading="lazy" onerror="this.style.display=\'none\'">' : '')+'</td>'
+        + '<td style="white-space:nowrap"><strong>'+Utils.esc(s.name)+'</strong></td>'
         + '<td><span class="card-tag" style="background:'+Utils.elementColor(s.element)+';color:#fff;font-size:10px">'+Utils.esc(s.element||'-')+'</span></td>'
         + '<td>'+Utils.esc(s.category||'-')+'</td>'
         + '<td>'+(s.cost!=null?s.cost:'-')+'</td>'
