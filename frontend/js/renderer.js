@@ -698,32 +698,24 @@ const Renderer = {
 
     let html = '<div class="page-header"><h2>技能数据库</h2><p>浏览所有技能、查找精灵会什么技能</p></div>';
 
-    // 筛选栏
-    html += '<div class="builder-filter-bar"><div class="filter-row">'
-      + '<button class="btn-filter'+(!elem?' active':'')+'" onclick="Renderer._skillFilterElem=\'\';Renderer._renderCurrentView()">全部属性</button>'
-      + '<select class="filter-select" onchange="Renderer._skillFilterElem=this.value;Renderer._renderCurrentView()">'
-      + '<option value="">属性</option>';
+    // 筛选栏（横向排列）
+    html += '<div class="filter-row" style="margin-bottom:10px;gap:6px;flex-wrap:wrap">'
+      + '<select class="filter-select" onchange="Renderer._skillFilterElem=this.value;Renderer._renderCurrentView()"><option value="">全部属性</option>';
     for (const e of allElements) {
       html += '<option value="'+e+'"'+(elem===e?' selected':'')+'>'+e+' ('+((byElem[e]||[]).length)+')</option>';
     }
     html += '</select>'
-      + '<select class="filter-select" onchange="Renderer._skillFilterCat=this.value;Renderer._renderCurrentView()">'
-      + '<option value="">分类</option>';
+      + '<select class="filter-select" onchange="Renderer._skillFilterCat=this.value;Renderer._renderCurrentView()"><option value="">分类</option>';
     for (const c of allCats) {
       html += '<option value="'+c+'"'+(cat===c?' selected':'')+'>'+c+' ('+((byCat[c]||[]).length)+')</option>';
     }
     html += '</select>'
-      + '</div></div>';
-    // 能耗+功能+排序
-    html += '<div class="filter-row" style="margin-bottom:8px;flex-wrap:wrap">'
-      + '<select class="filter-select" onchange="Renderer._skillCostFilter=this.value||null;Renderer._renderCurrentView()">'
-      + '<option value="">能耗</option>';
+      + '<select class="filter-select" onchange="Renderer._skillCostFilter=this.value||null;Renderer._renderCurrentView()"><option value="">能耗</option>';
     for (let c=0;c<=10;c++) {
       html += '<option value="'+c+'"'+(Number(cost)===c?' selected':'')+'>'+c+'费</option>';
     }
-      html += '</select>'
-      + '<select class="filter-select" onchange="Renderer._skillFuncFilter=this.value;Renderer._renderCurrentView()">'
-      + '<option value="">功能</option>'
+    html += '</select>'
+      + '<select class="filter-select" onchange="Renderer._skillFuncFilter=this.value;Renderer._renderCurrentView()"><option value="">功能</option>'
       + '<option value="清强化"'+(func==='清强化'?' selected':'')+'>清强化</option>'
       + '<option value="印记"'+(func==='印记'?' selected':'')+'>印记</option>'
       + '<option value="清印记"'+(func==='清印记'?' selected':'')+'>清印记</option>'
@@ -731,28 +723,13 @@ const Renderer = {
       + '<option value="护盾"'+(func==='护盾'?' selected':'')+'>护盾</option>'
       + '<option value="先手"'+(func==='先手'?' selected':'')+'>先手</option>'
       + '</select>'
-      + '<select class="filter-select" onchange="Renderer._skillSortBy=this.value;Renderer._renderCurrentView()">'
-      + '<option value="">排序</option>'
+      + '<select class="filter-select" onchange="Renderer._skillSortBy=this.value;Renderer._renderCurrentView()"><option value="">排序</option>'
       + '<option value="power_desc"'+(sortBy==='power_desc'?' selected':'')+'>威力⬇</option>'
       + '<option value="power_asc"'+(sortBy==='power_asc'?' selected':'')+'>威力⬆</option>'
       + '</select>'
-      + '<span style="font-size:13px;color:var(--neutral-500);line-height:32px">'+filtered.length+'/'+allSkills.length+'</span>'
+      + '<span style="font-size:13px;color:var(--neutral-400);line-height:32px;margin-left:4px">'+filtered.length+'/'+allSkills.length+'</span>'
       + '</div>';
-    
 
-    // 使用顶栏搜索框
-    this._showSearch(true);
-    if (this._searchInput) {
-      this._searchInput.value = this._searchKw || '';
-      this._searchInput.setAttribute('placeholder', '搜索技能名或效果...');
-    }
-
-    // 统计卡片
-    html += '<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">'
-      + '<span class="card-tag">总计 '+allSkills.length+' 技能</span>'
-      + '<span class="card-tag">'+allElements.length+' 种属性</span>'
-      + '<span class="card-tag">'+allCats.length+' 种分类</span>'
-      + '</div>';
 
     // 技能表格
     html += '<div style="overflow-x:auto"><table class="skill-table" style="font-size:13px"><thead><tr>'
