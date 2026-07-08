@@ -894,7 +894,8 @@ const Renderer = {
     let html = '<div class="page-header"><h2>阵容分享</h2>'
       + '<p>查看玩家分享的PVP阵容，找到适合你的队伍'
       + ' <span class="info-icon" title="无需登录，基于浏览器本地标识识别。换电脑/重装/清缓存会导致标识丢失，无法管理旧阵容。">i</span>'
-      + '</p></div>';
+      + '</p></div>'
+      + '<div class="share-notice">⚠️ 禁止发布违规内容（卖片、辱骂、广告等），系统定期清理并保留追究权利。</div>';
 
     // 标签栏
     html += '<div class="filter-row" style="margin-bottom:4px">'
