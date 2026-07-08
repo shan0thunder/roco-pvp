@@ -30,6 +30,7 @@ const Renderer = {
   // 阵容分享
   _shareSortBy: 'new',  // 排序: new|click|cover|resist
   _shareShowMine: false, // true=只显示我的阵容
+  _shareShowFav: false, // true=只显示收藏
   _shareDialog: null,   // 分享弹窗DOM
 
   // 配队器筛选
@@ -262,6 +263,7 @@ const Renderer = {
       + '<div class="builder-bar-row title-row">'
       + '<span class="builder-bar-title">队伍 ('+this._team.length+'/6)</span>'
       + (this._team.length && isCollapsed ? '' : (this._team.length ? '<button class="btn-sm" onclick="Renderer._clearTeam();Renderer._renderCurrentView()">清空</button>' : ''))
+      + (!isCollapsed ? '<button class="btn-sm" onclick="Renderer._favTeamFromBuilder()">⭐ 收藏</button>' : '')
       + (!isCollapsed ? '<button class="btn-sm" style="margin-left:auto" onclick="Renderer._openShareDialog()">分享</button>' : '')
       + (!isCollapsed ? '<button class="btn-sm" onclick="Renderer._exportTeam()">导出</button>' : '');
 
@@ -849,6 +851,7 @@ const Renderer = {
 
     let myId = DeviceID.get();
     let showMine = this._shareShowMine;
+    let showFav = this._shareShowFav;
     let kw = (this._searchKw || '').toLowerCase();
     const sortField = this._shareSortBy === 'click' ? 'click_count'
       : this._shareSortBy === 'cover' ? 'attack_count'
@@ -866,9 +869,19 @@ const Renderer = {
     }
 
     // 前端筛选
-    let filtered = allTeams;
-    if (showMine) {
-      filtered = filtered.filter(t => t.user_id === myId);
+    let filtered = [];
+    if (showFav) {
+      // 我的收藏 = 公开阵容中收藏的 + 本地配队器收藏的草稿
+      const favIds = this._getFavIds();
+      filtered = allTeams.filter(t => favIds.includes(t.id));
+      // 加上本地草稿
+      const drafts = this._getFavDrafts();
+      filtered = [...drafts, ...filtered];
+    } else {
+      filtered = allTeams;
+      if (showMine) {
+        filtered = filtered.filter(t => t.user_id === myId);
+      }
     }
     if (kw) {
       filtered = filtered.filter(t =>
@@ -885,11 +898,12 @@ const Renderer = {
 
     // 标签栏
     html += '<div class="filter-row" style="margin-bottom:4px">'
-      + '<button class="btn-filter'+(showMine?'':' active')+'" onclick="Renderer._shareShowMine=false;Renderer._renderCurrentView()">全部阵容</button>'
-      + '<button class="btn-filter'+(showMine?' active':'')+'" onclick="Renderer._shareShowMine=true;Renderer._renderCurrentView()">👤 我的阵容</button>'
+      + '<button class="btn-filter'+(showFav?'':' active')+'" onclick="Renderer._shareShowMine=false;Renderer._shareShowFav=false;Renderer._renderCurrentView()">全部阵容</button>'
+      + '<button class="btn-filter'+(showMine?' active':'')+'" onclick="Renderer._shareShowMine=true;Renderer._shareShowFav=false;Renderer._renderCurrentView()">👤 我的阵容</button>'
+      + '<button class="btn-filter'+(showFav?' active':'')+'" onclick="Renderer._shareShowMine=false;Renderer._shareShowFav=true;Renderer._renderCurrentView()">⭐ 我的收藏</button>'
       + '</div>'
       + '<div style="font-size:11px;color:var(--neutral-500);margin-bottom:12px;line-height:1.5">'
-      + '「我的阵容」基于浏览器本地标识识别，无需登录。换电脑、重装系统、手动清除浏览器缓存(历史记录/Cookie/存储)会导致标识丢失，无法管理旧阵容，但已发布的阵容仍在。如需修改已发布的阵容，可记下阵容ID联系开发者。'
+      + '「我的阵容」基于浏览器本地标识识别，无需登录。「我的收藏」基于浏览器本地存储(收藏阵容ID+配队器草稿)，清除浏览器缓存会丢失收藏数据，但不影响已发布的阵容。如需修改已发布的阵容，可记下阵容ID联系开发者。'
       + '</div>';
 
     // 使用顶栏搜索框
@@ -925,7 +939,9 @@ const Renderer = {
       const timeAgo = this._timeAgo(entry.created_at);
       const isMine = entry.user_id === myId;
 
-      html += '<div class="share-card'+(isMine?' share-card-mine':'')+'" onclick="Renderer._clickSharedTeam('+entry.id+')">'
+      const isFav = this._isFav(entry.id);
+      html += '<div class="share-card'+(isMine?' share-card-mine':'')+'" onclick="Renderer._clickSharedTeam('+entry.id+')" style="position:relative">'
+        + '<span class="fav-star'+(isFav?' on':'')+'" onclick="event.stopPropagation();Renderer._toggleFav('+entry.id+')">'+(isFav?'★':'☆')+'</span>'
         + (entry.team_name ? '<div class="share-team-name">'+Utils.esc(entry.team_name)+'</div>' : '')
         + '<div class="share-card-header"><div class="share-pet-grid">'
         + '<div class="share-pet-row3">';
@@ -971,6 +987,11 @@ const Renderer = {
       if (isMine && showMine) {
         html += '<div style="display:flex;gap:6px;margin-top:6px">'
           + '<button class="btn-sm" style="background:var(--danger-500)" onclick="event.stopPropagation();Renderer._deleteMyTeam('+entry.id+')">🗑 删除</button>'
+          + '</div>';
+      }
+      if (showFav && entry._isDraft) {
+        html += '<div style="display:flex;gap:6px;margin-top:6px">'
+          + '<button class="btn-sm" style="background:var(--danger-500)" onclick="event.stopPropagation();Renderer._deleteFavDraft(\''+entry.id+'\')">🗑 删除</button>'
           + '</div>';
       }
       html += '</div>';
@@ -1050,6 +1071,62 @@ const Renderer = {
     }).catch(() => {
       prompt('复制以下内容:', text);
     });
+  },
+
+  // ============================================================
+  // 收藏功能
+  // ============================================================
+  _getFavIds() {
+    try { return JSON.parse(localStorage.getItem('pvp_fav_ids') || '[]'); }
+    catch { return []; }
+  },
+  _saveFavIds(ids) { localStorage.setItem('pvp_fav_ids', JSON.stringify(ids)); },
+
+  _isFav(id) { return this._getFavIds().includes(id); },
+
+  _toggleFav(id) {
+    let ids = this._getFavIds();
+    if (ids.includes(id)) { ids = ids.filter(i => i !== id); }
+    else { ids.push(id); }
+    this._saveFavIds(ids);
+    this._renderCurrentView();
+  },
+
+  /** 收藏配队器结果（存本地，不进公开池） */
+  _favTeamFromBuilder() {
+    if (this._team.length === 0) { alert('请先配队'); return; }
+    const entry = {
+      id: 'fav_' + Date.now(),
+      team_name: '收藏队伍',
+      pet_names: this._team.map(p => p.name),
+      elements: [...new Set(this._team.flatMap(p => p.element||[]))],
+      skills: {}, natures: {}, wills: {}, stats: {},
+      description: '来自配队器的收藏',
+      created_at: new Date().toISOString(),
+      _isDraft: true,
+    };
+    for (let i = 0; i < 6; i++) {
+      const sk = (this._teamSkills[i]||[]).filter(Boolean).map(s => s.name);
+      entry.skills[i] = sk;
+      if (this._petNature[i]) entry.natures[i] = this._petNature[i];
+      if (this._teamWill[i]) entry.wills[i] = this._teamWill[i];
+      if (this._teamStats[i]?.length) entry.stats[i] = this._teamStats[i];
+    }
+    let drafts = this._getFavDrafts();
+    drafts.unshift(entry);
+    this._saveFavDrafts(drafts);
+    alert('✅ 已收藏到「我的收藏」');
+  },
+
+  _getFavDrafts() {
+    try { return JSON.parse(localStorage.getItem('pvp_fav_drafts') || '[]'); }
+    catch { return []; }
+  },
+  _saveFavDrafts(d) { localStorage.setItem('pvp_fav_drafts', JSON.stringify(d)); },
+  _deleteFavDraft(id) {
+    let d = this._getFavDrafts();
+    this._saveFavDrafts(d.filter(e => e.id !== id));
+    this._renderCurrentView();
   },
 
   /** 删除我的阵容 */
