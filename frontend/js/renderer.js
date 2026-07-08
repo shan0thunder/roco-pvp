@@ -666,11 +666,15 @@ const Renderer = {
   async _renderSkills() {
     const data = await DataStore.load();
     await this._ensureSkillIndex();
+    if (!this._stoneMap) {
+      try { const r = await fetch('data/skill_stone_sources.json'); if (r.ok) this._stoneMap = await r.json(); } catch(e) {}
+    }
 
     const allSkills = this._skillIndex?.allSkills || [];
     const byElem = this._skillIndex?.byElement || {};
     const byCat = this._skillIndex?.byCategory || {};
     const skillToPets = this._skillIndex?.skillToPets || {};
+    const stoneMap = this._stoneMap || {};
 
     const elem = this._skillFilterElem || '';
     const cat = this._skillFilterCat || '';
@@ -715,7 +719,7 @@ const Renderer = {
       + '<select class="filter-select" onchange="Renderer._skillCostFilter=this.value||null;Renderer._renderCurrentView()">'
       + '<option value="">能耗</option>';
     for (let c=0;c<=10;c++) {
-      html += '<option value="'+c+'"'+(cost===c?' selected':'')+'>'+c+'费</option>';
+      html += '<option value="'+c+'"'+(Number(cost)===c?' selected':'')+'>'+c+'费</option>';
     }
       html += '</select>'
       + '<select class="filter-select" onchange="Renderer._skillFuncFilter=this.value;Renderer._renderCurrentView()">'
@@ -752,7 +756,7 @@ const Renderer = {
 
     // 技能表格
     html += '<div style="overflow-x:auto"><table class="skill-table" style="font-size:13px"><thead><tr>'
-      + '<th>名称</th><th>属性</th><th>分类</th><th>能耗</th><th>威力</th><th>效果</th><th>使用精灵</th>'
+      + '<th>名称</th><th>属性</th><th>分类</th><th>能耗</th><th>威力</th><th>效果</th><th>使用精灵</th><th>来源</th>'
       + '</tr></thead><tbody>';
 
     for (const s of filtered) {
@@ -769,8 +773,9 @@ const Renderer = {
         + '<td>'+(s.power!=null?s.power:'-')+'</td>'
         + '<td class="skill-effect" style="max-width:300px">'+Utils.esc((s.effect||'').slice(0,60))+' <span style="font-size:10px;color:var(--neutral-300)">'+(isExpanded?'▲':'▼')+'</span></td>'
         + '<td style="font-size:12px;color:var(--neutral-500)">'+petNames+'<span style="color:var(--primary-500)">'+more+'</span></td>'
+        + '<td style="font-size:11px;color:var(--neutral-400);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+Utils.esc(stoneMap[s.name]||'')+'">'+Utils.esc(stoneMap[s.name]||'—')+'</td>'
         + '</tr>'
-        + (isExpanded ? '<tr class="skill-pets-row"><td colspan="7"><div style="display:flex;flex-wrap:wrap;gap:4px;padding:8px;background:var(--neutral-50)">'+(petsWith.length ? petsWith.map(pn => '<span class="skill-pet-link" onclick="event.stopPropagation();Router.go(\'pet\',\''+Utils.esc(pn)+'\');Renderer._renderCurrentView()" style="padding:2px 8px;border-radius:4px;border:1px solid var(--neutral-200);cursor:pointer;font-size:12px">'+Utils.esc(pn)+'</span>').join('') : '<span style="font-size:12px;color:var(--neutral-500)">暂无</span>')+'</div></td></tr>' : '');
+        + (isExpanded ? '<tr class="skill-pets-row"><td colspan="8"><div style="display:flex;flex-wrap:wrap;gap:4px;padding:8px;background:var(--neutral-50)">'+(petsWith.length ? petsWith.map(pn => '<span class="skill-pet-link" onclick="event.stopPropagation();Router.go(\'pet\',\''+Utils.esc(pn)+'\');Renderer._renderCurrentView()" style="padding:2px 8px;border-radius:4px;border:1px solid var(--neutral-200);cursor:pointer;font-size:12px">'+Utils.esc(pn)+'</span>').join('') : '<span style="font-size:12px;color:var(--neutral-500)">暂无</span>')+'</div></td></tr>' : '');
     }
 
     html += '</tbody></table></div>';
