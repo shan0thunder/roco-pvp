@@ -32,6 +32,10 @@ const Renderer = {
   _shareShowMine: false, // true=只显示我的阵容
   _shareShowFav: false, // true=只显示收藏
   _shareDialog: null,   // 分享弹窗DOM
+  _skillCostFilter: null,
+  _skillFuncFilter: '',
+  _skillSortBy: '',
+  _skillExpanded: null,
 
   // 配队器筛选
   _builderFilter: null,
