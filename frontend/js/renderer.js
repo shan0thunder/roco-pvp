@@ -716,7 +716,7 @@ const Renderer = {
     html += '</select>'
       + '<select class="filter-select" onchange="Renderer._skillCostFilter=this.value||null;Renderer._renderCurrentView()"><option value="">能耗</option>';
     for (let c=0;c<=10;c++) {
-      html += '<option value="'+c+'"'+(Number(cost)===c?' selected':'')+'>'+c+'费</option>';
+      html += '<option value="'+c+'"'+(cost!==null && cost!==undefined && Number(cost)===c?' selected':'')+'>'+c+'费</option>';
     }
     html += '</select>'
       + '<select class="filter-select" onchange="Renderer._skillFuncFilter=this.value;Renderer._renderCurrentView()"><option value="">功能</option>'
