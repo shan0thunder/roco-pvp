@@ -756,7 +756,7 @@ const Renderer = {
 
     // 技能表格
     html += '<div style="overflow-x:auto"><table class="skill-table" style="font-size:13px"><thead><tr>'
-      + '<th>名称</th><th>属性</th><th>分类</th><th>能耗</th><th>威力</th><th>效果</th><th>使用精灵</th><th>来源</th>'
+      + '<th>名称</th><th>属性</th><th>分类</th><th>能耗</th><th>威力</th><th>效果</th><th>使用精灵</th><th>来源</th><th>来源</th>'
       + '</tr></thead><tbody>';
 
     for (const s of filtered) {
