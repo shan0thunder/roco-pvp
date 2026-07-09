@@ -152,33 +152,39 @@ body {
 .analysis-dot:hover { transform: scale(1.1); }
 
 /* --- 详情面板 --- */
-.slot-detail-panel { display: grid; grid-template-columns: 120px 100px 1fr 1.2fr; gap: var(--space-3); padding: var(--space-4); margin-bottom: var(--space-4); background: var(--white); border-radius: var(--radius-lg); border: 1.5px solid var(--neutral-200); box-shadow: var(--shadow-sm); position: relative; overflow: hidden; }
-.sd-col { display: flex; flex-direction: column; min-height: 0; }
-.sd-col-title { font-size: 9px; font-weight: 700; color: var(--neutral-400); margin-bottom: 6px; letter-spacing: 0.06em; text-transform: uppercase; border-bottom: 1px solid var(--neutral-100); padding-bottom: 4px; flex-shrink: 0; }
-.sd-col-pet { align-items: center; text-align: center; gap: 6px; }
-.sd-pet-img { width: 80px; height: 80px; object-fit: contain; background: var(--neutral-50); border-radius: var(--radius); flex-shrink: 0; }
-.sd-pet-name { font-weight: 700; font-size: var(--text-sm); color: var(--neutral-900); }
-.sd-pet-elems .card-tag { font-size: 9px; padding: 1px 6px; }
-.sd-stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; }
-.sd-stat-item { background: var(--white); border: 1px solid var(--neutral-100); border-radius: 4px; padding: 2px 4px; text-align: center; cursor: pointer; }
+.slot-detail-panel { display: grid; grid-template-columns: 115px 95px 1fr 1fr; gap: 8px; padding: 12px; margin-bottom: var(--space-4); background: var(--white); border-radius: var(--radius-lg); border: 1.5px solid var(--neutral-200); box-shadow: var(--shadow-sm); position: relative; height: 240px; overflow: hidden; }
+.sd-col { display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+.sd-col-title { font-size: 9px; font-weight: 700; color: var(--neutral-400); margin-bottom: 4px; letter-spacing: 0.06em; text-transform: uppercase; border-bottom: 1px solid var(--neutral-100); padding-bottom: 3px; flex-shrink: 0; }
+.sd-col-pet { align-items: center; text-align: center; gap: 4px; }
+.sd-pet-img-wrap { flex-shrink: 0; }
+.sd-pet-img { width: 72px; height: 72px; object-fit: contain; background: var(--neutral-50); border-radius: var(--radius); }
+.sd-pet-name { font-weight: 700; font-size: var(--text-sm); color: var(--neutral-900); flex-shrink: 0; }
+.sd-pet-elems { flex-shrink: 0; }
+.sd-pet-elems .card-tag { font-size: 9px; padding: 1px 5px; }
+.sd-pet-stats { flex: 1; min-height: 0; display: flex; align-items: center; }
+.sd-stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; width: 100%; }
+.sd-stat-item { background: var(--white); border: 1px solid var(--neutral-100); border-radius: 4px; padding: 1px 3px; text-align: center; cursor: pointer; }
 .sd-stat-item:hover { border-color: var(--primary-500); }
 .sd-stat-item.sel { background: #FFF3CD !important; border-color: #F59E0B; }
 .sd-stat-label { font-size: 8px; color: var(--neutral-400); display: block; }
-.sd-stat-val { font-size: 11px; font-weight: 700; color: var(--primary-600); }
-.sd-nature-select { width: 100%; padding: 6px 8px; border: 1px solid var(--neutral-200); border-radius: var(--radius); font-size: var(--text-xs); outline: none; cursor: pointer; transition: border-color 0.15s; }
+.sd-stat-val { font-size: 10px; font-weight: 700; color: var(--primary-600); }
+.sd-col-nature { gap: 4px; }
+.sd-nature-select { width: 100%; padding: 4px 6px; border: 1px solid var(--neutral-200); border-radius: var(--radius); font-size: var(--text-xs); outline: none; cursor: pointer; }
 .sd-nature-select:focus { border-color: var(--primary-500); }
+.sd-col-desc { font-size: 10px; color: var(--neutral-500); line-height: 1.4; padding: 4px; border-top: 1px solid var(--neutral-100); margin-top: 4px; overflow-y: auto; flex: 1; }
 .sd-col-skills { display: flex; flex-direction: column; min-height: 0; }
-.sd-col-skills .skill-slot-grid { flex: 1; display: flex; flex-direction: column; gap: 4px; min-height: 0; }
-.sd-col-skills .skill-slot-row { flex: 1; display: flex; gap: 4px; min-height: 0; }
-.sd-col-skills .skill-slot { flex: 1; min-height: 0; padding: 4px 6px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: grab; border: 2px dashed var(--neutral-200); background: var(--neutral-50); border-radius: 6px; text-align: center; }
+.sd-col-skills .skill-slot-grid { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.sd-col-skills .skill-slot-row { flex: 1; display: flex; gap: 4px; }
+.sd-col-skills .skill-slot { flex: 1; min-height: 0; padding: 2px 4px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: grab; border: 2px dashed var(--neutral-200); background: var(--neutral-50); border-radius: 5px; text-align: center; overflow: hidden; }
 .sd-col-skills .skill-slot.filled { border-style: solid; border-color: var(--primary-500); background: var(--primary-50); }
-.sd-col-skills .skill-slot-name { font-size: 12px; font-weight: 700; line-height: 1.2; }
-.sd-col-skills .skill-slot-meta { font-size: 10px; color: var(--neutral-500); line-height: 1.2; }
+.sd-col-skills .skill-slot-name { font-size: 11px; font-weight: 700; line-height: 1.2; }
+.sd-col-skills .skill-slot-meta { font-size: 9px; color: var(--neutral-500); line-height: 1.2; }
+.sd-col-skills .skill-slot-effect { font-size: 8px; color: var(--neutral-500); line-height: 1.1; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
 .sd-col-pool { display: flex; flex-direction: column; min-height: 0; }
 .sd-col-pool .sd-pool-scroll { flex: 1; min-height: 0; overflow-y: auto; border: 1px solid var(--neutral-200); border-radius: var(--radius); }
 .sd-col-pool .skill-table { font-size: var(--text-xs); width: 100%; }
 .sd-col-pool .skill-table th { position: sticky; top: 0; background: var(--neutral-100); z-index: 1; }
-.sd-close { position: absolute; top: 8px; right: 8px; z-index: 5; width: 24px; height: 24px; border-radius: 50%; border: none; background: var(--neutral-100); color: var(--neutral-500); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.sd-close { position: absolute; top: 6px; right: 6px; z-index: 5; width: 22px; height: 22px; border-radius: 50%; border: none; background: var(--neutral-100); color: var(--neutral-500); font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
 /* --- 技能槽 --- */
 .skill-slot-grid { margin-top: 4px; flex: 1; display: flex; flex-direction: column; }
