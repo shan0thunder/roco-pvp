@@ -245,21 +245,21 @@ body {
 /* ============================================
    阵容分享页
    ============================================ */
-.share-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--space-3); }
-.share-card { background: var(--white); border: 1.5px solid var(--neutral-200); border-radius: var(--radius-lg); padding: var(--space-4); cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s; position: relative; }
+.share-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--space-3); }
+.share-card { background: var(--white); border: 1.5px solid var(--neutral-200); border-radius: var(--radius-lg); padding: var(--space-3); cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s; position: relative; height: 200px; display: flex; flex-direction: column; overflow: hidden; }
 .share-card:hover { border-color: var(--primary-500); box-shadow: var(--shadow-md); }
 .share-card.share-card-mine { border-left: 4px solid var(--primary-500); }
-.share-card-header { display: flex; flex-direction: column; align-items: center; }
-.share-pet-grid { display: flex; flex-direction: column; gap: 4px; align-items: center; }
-.share-pet-row3 { display: flex; gap: 6px; justify-content: center; }
-.share-team-name { font-size: var(--text-base); font-weight: 700; margin-bottom: var(--space-2); color: var(--neutral-900); text-align: center; }
-.share-pet-mini { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 48px; }
-.share-pet-mini img { width: 40px; height: 40px; object-fit: contain; border-radius: 6px; background: var(--neutral-50); }
-.share-pet-mini span { font-size: 10px; color: var(--neutral-500); text-align: center; overflow: hidden; text-overflow: ellipsis; max-width: 48px; white-space: nowrap; }
+.share-card-header { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+.share-pet-grid { display: flex; flex-direction: column; gap: 3px; align-items: center; }
+.share-pet-row3 { display: flex; gap: 4px; justify-content: center; }
+.share-team-name { font-size: var(--text-sm); font-weight: 700; margin-bottom: var(--space-1); color: var(--neutral-900); text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; flex-shrink: 0; }
+.share-pet-mini { display: flex; flex-direction: column; align-items: center; gap: 1px; width: 44px; flex-shrink: 0; }
+.share-pet-mini img { width: 36px; height: 36px; object-fit: contain; border-radius: 4px; background: var(--neutral-50); }
+.share-pet-mini span { font-size: 9px; color: var(--neutral-500); text-align: center; overflow: hidden; text-overflow: ellipsis; max-width: 44px; white-space: nowrap; }
 .share-pet-initial { width: 40px; height: 40px; border-radius: 6px; background: var(--primary-50); display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--primary-500); font-weight: 700; }
-.share-elems { display: flex; gap: 3px; flex-wrap: wrap; margin-top: 6px; justify-content: center; }
-.share-desc { font-size: 12px; color: var(--neutral-500); margin: var(--space-2) 0; line-height: 1.5; }
-.share-stats { display: flex; gap: var(--space-3); font-size: 11px; color: var(--neutral-400); justify-content: center; }
+.share-elems { display: flex; gap: 2px; flex-wrap: wrap; margin-top: 4px; justify-content: center; flex-shrink: 0; }
+.share-desc { font-size: 11px; color: var(--neutral-500); margin: 4px 0; line-height: 1.4; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; flex: 1; min-height: 0; }
+.share-stats { display: flex; gap: var(--space-2); font-size: 10px; color: var(--neutral-400); justify-content: center; flex-shrink: 0; padding-top: 2px; }
 .share-notice { font-size: 12px; color: var(--danger-500); background: var(--danger-50); padding: 8px 12px; border-radius: var(--radius); margin-bottom: var(--space-3); line-height: 1.5; border: 1px solid rgba(220,38,38,0.15); }
 
 /* 分享弹窗 */
