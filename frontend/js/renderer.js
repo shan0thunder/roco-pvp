@@ -300,11 +300,11 @@ const Renderer = {
         const p = this._team[i];
         if (p) {
           const elTags = (p.element||[]).map(e => '<span class="card-tag" style="background:'+Utils.elementColor(e)+';color:#fff">'+Utils.esc(e)+'</span>').join('');
-          html += '<div class="bar-slot filled" draggable="true" onclick="Renderer._showSlotDetail('+i+')" ondragstart="Renderer._dragSlotStart(event,'+i+')" ondragover="event.preventDefault()" ondrop="Renderer._dragSlotDrop(event,'+i+')">'
+          html += '<div class="bar-slot filled" onclick="Renderer._showSlotDetail('+i+')">'
+            + '<button class="bar-slot-remove" onclick="event.stopPropagation();Renderer._removeFromTeam('+i+');Renderer._renderCurrentView()">−</button>'
             + (p.image ? '<img class="bar-slot-img" src="'+Utils.esc(p.image)+'" alt="">' : '')
             + '<div class="bar-slot-name">'+Utils.esc(p.name)+'</div>'
             + '<div class="bar-slot-elems">'+elTags+'</div>'
-            + '<button class="bar-slot-remove" onclick="event.stopPropagation();Renderer._removeFromTeam('+i+');Renderer._renderCurrentView()">−</button>'
             + '</div>';
         } else {
           html += '<div class="bar-slot empty" onclick="Renderer._openPetSelector()"><span class="bar-slot-placeholder">+</span></div>';
