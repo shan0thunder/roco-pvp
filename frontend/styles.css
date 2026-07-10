@@ -152,7 +152,7 @@ body {
 .analysis-dot:hover { transform: scale(1.1); }
 
 /* --- 详情面板 --- */
-.slot-detail-panel { display: grid; grid-template-columns: 110px 100px 1fr 1.2fr; gap: 8px; padding: 12px; margin-bottom: var(--space-4); background: var(--white); border-radius: var(--radius-lg); border: 1.5px solid var(--neutral-200); box-shadow: var(--shadow-sm); position: relative; height: 215px; overflow: hidden; }
+.slot-detail-panel { display: grid; grid-template-columns: 110px 100px 1fr 1.2fr; gap: 8px; padding: 12px; margin-bottom: var(--space-4); background: var(--white); border-radius: var(--radius-lg); border: 1.5px solid var(--neutral-200); box-shadow: var(--shadow-sm); position: relative; height: 230px; overflow: hidden; }
 .sd-col { display: flex; flex-direction: column; min-height: 0; overflow: hidden; height: 100%; }
 .sd-col-title { font-size: 9px; font-weight: 700; color: var(--neutral-400); margin-bottom: 4px; letter-spacing: 0.06em; text-transform: uppercase; border-bottom: 1px solid var(--neutral-100); padding-bottom: 3px; flex-shrink: 0; }
 .sd-col-pet { align-items: center; text-align: center; gap: 4px; }
