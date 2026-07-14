@@ -398,8 +398,10 @@ const Renderer = {
         + (sp.image ? '<div class="sd-pet-img-wrap"><img class="sd-pet-img" src="'+Utils.esc(sp.image)+'" alt=""></div>' : '')
         + '<div class="sd-pet-name">'+Utils.esc(sp.name)+'</div>'
         + '<div class="sd-pet-elems">'+elBadges+'</div>'
+        + '<div class="sd-stat-header"><span class="sd-stat-title">种族值</span>'
+        + '<span class="sd-pvp-switch'+(this._pvpMode?' on':'')+'" onclick="Renderer._pvpMode=!Renderer._pvpMode;Renderer._renderCurrentView()"><span class="sd-pvp-knob"></span></span>'
+        + '</div>'
         + '<div class="sd-pet-stats"><div class="sd-stat-row">'
-        + '<div class="sd-pvp-toggle" onclick="Renderer._pvpMode=!Renderer._pvpMode;Renderer._renderCurrentView()" title="切换种族值/PVP计算">'+(this._pvpMode?'PVP':'族')+'</div>'
         + this._statItem(petIdx, st, 'hp', '生')
         + this._statItem(petIdx, st, 'attack', '攻')
         + this._statItem(petIdx, st, 'defense', '防')
@@ -408,7 +410,7 @@ const Renderer = {
         + this._statItem(petIdx, st, 'speed', '速')
         + '</div></div></div>'
         + '<div class="sd-col sd-col-nature">'
-        + '<div class="sd-col-title">性格</div>'
+        + '<div class="sd-col-title">性格'+ (this._pvpMode?' <span style="font-size:8px;color:var(--accent-500)">PVP</span>':'') + '</div>'
         + '<select class="sd-nature-select" onchange="Renderer._petNature['+petIdx+']=this.value;Renderer._renderCurrentView()">'
         + '<option value="">选择</option>';
       const STAT_NAMES = {hp:'生命',attack:'物攻',defense:'物防',magic_attack:'魔攻',magic_defense:'魔防',speed:'速度'};

@@ -166,8 +166,12 @@ body {
 .sd-stat-item { background: var(--white); border: 1px solid var(--neutral-100); border-radius: 4px; padding: 1px 3px; text-align: center; cursor: pointer; }
 .sd-stat-item:hover { border-color: var(--primary-500); }
 .sd-stat-item.sel { background: #FFF3CD !important; border-color: #F59E0B; }
-.sd-pvp-toggle { writing-mode:vertical-lr; font-size:9px; font-weight:700; cursor:pointer; padding:2px 3px; border-radius:3px; background:var(--neutral-100); color:var(--neutral-500); text-align:center; letter-spacing:0.1em; transition:all 0.15s; user-select:none; }
-.sd-pvp-toggle:hover { background:var(--primary-500); color:#fff; }
+.sd-stat-header { display:flex; align-items:center; gap:6px; margin-bottom:4px; }
+.sd-stat-title { font-size:9px; font-weight:700; color:var(--neutral-400); letter-spacing:0.06em; text-transform:uppercase; }
+.sd-pvp-switch { position:relative; width:28px; height:14px; border-radius:7px; background:var(--neutral-200); cursor:pointer; transition:background 0.2s; flex-shrink:0; }
+.sd-pvp-switch.on { background:var(--primary-500); }
+.sd-pvp-knob { position:absolute; top:2px; left:2px; width:10px; height:10px; border-radius:50%; background:#fff; transition:left 0.2s; box-shadow:0 1px 2px rgba(0,0,0,0.15); }
+.sd-pvp-switch.on .sd-pvp-knob { left:16px; }
 .sd-stat-label { font-size: 8px; color: var(--neutral-400); display: block; }
 .sd-stat-val { font-size: 10px; font-weight: 700; color: var(--primary-600); }
 .sd-stat-item.pvp .sd-stat-val { color: #16a34a; }
