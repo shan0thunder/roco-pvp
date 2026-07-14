@@ -1364,42 +1364,24 @@ const Renderer = {
 
     // PVP模式计算
     let displayVal = val;
-    let extra = '';
-    let pvpCls = '';
+    let cls = isSel ? 'sd-stat-item sel' : 'sd-stat-item';
     if (pvpMode && nature) {
-      // 从性格名称映射修正倍率
-      const natureMap = {
-        'hp':'hp','attack':'attack','defense':'defense','magic_attack':'magic_attack',
-        'magic_defense':'magic_defense','speed':'speed'
-      };
-      // 性格倍率: +10% 或 -10%
       let natureMult = 1.0;
-      // 查看本精灵的性格选择，确定哪项+10%哪项-10%
-      // _petNature 存的是选中的属性key (如'speed')
       if (nature === key) natureMult = 1.1;
       else {
-        // -10%只影响魔防（天真性格的设定）
-        const natureNeg = {'speed':'magic_defense'};
+        const natureNeg = {'speed':'magic_defense','attack':'magic_attack','magic_attack':'attack','defense':'magic_defense','magic_defense':'defense','hp':'defense'};
         if (natureNeg[nature] === key) natureMult = 0.9;
       }
-
       const baseRace = Number(val);
       if (!isNaN(baseRace)) {
-        // IV基础，选中项可用加点
-        const iv = isSel ? 60 : 0; // 简单起见，选中=60点，未选中=0
-        if (key === 'hp') {
-          displayVal = this._calcPvpHp(baseRace, natureMult, iv);
-        } else {
-          displayVal = this._calcPvpStat(baseRace, natureMult, iv);
-        }
-        pvpCls = 'pvp';
+        const iv = isSel ? 60 : 0;
+        if (key === 'hp') displayVal = this._calcPvpHp(baseRace, natureMult, iv);
+        else displayVal = this._calcPvpStat(baseRace, natureMult, iv);
+        cls += ' pvp';
       }
-      extra = '<span class="sd-stat-pvp">PVP</span>';
     }
-
-    const cls = isSel ? 'sd-stat-item sel' : 'sd-stat-item' + (pvpCls ? ' '+pvpCls : '');
     return '<div class="'+cls+'" onclick="Renderer._toggleStat('+petIdx+',\''+key+'\')">'
-      + '<span class="sd-stat-label">'+label+extra+'</span>'
+      + '<span class="sd-stat-label">'+label+'</span>'
       + '<span class="sd-stat-val">'+displayVal+'</span></div>';
   },
 
