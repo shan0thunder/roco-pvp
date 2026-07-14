@@ -19,6 +19,7 @@ const Renderer = {
   _slotOptionMode: null,
   _petNature: {},
   _teamStats: {},  // 每只精灵选中的种族值 { slotIndex: ['speed','attack'] } 最多3个
+  _pvpMode: false, // 种族值/PVP模式切换
   _selectedSlot: null,
   _expandedPet: null,
   _petFilterElem: '',
@@ -398,6 +399,7 @@ const Renderer = {
         + '<div class="sd-pet-name">'+Utils.esc(sp.name)+'</div>'
         + '<div class="sd-pet-elems">'+elBadges+'</div>'
         + '<div class="sd-pet-stats"><div class="sd-stat-row">'
+        + '<div class="sd-pvp-toggle" onclick="Renderer._pvpMode=!Renderer._pvpMode;Renderer._renderCurrentView()" title="切换种族值/PVP计算">'+(this._pvpMode?'PVP':'族')+'</div>'
         + this._statItem(petIdx, st, 'hp', '生')
         + this._statItem(petIdx, st, 'attack', '攻')
         + this._statItem(petIdx, st, 'defense', '防')
@@ -1341,13 +1343,62 @@ const Renderer = {
   },
 
   /** 自动保存队伍快照到 localStorage */
-  /** 渲染可点击的种族值项 */
+  /** PVP实际数值计算（验证通过的公式） */
+  _calcPvpStat(race, nature, iv) {
+    // 速度/攻/防/魔攻/魔防 公式
+    return Math.round(Math.round(race * 1.1 + iv * 0.55 + 10) * nature + 50);
+  },
+  _calcPvpHp(race, nature, iv) {
+    return Math.round(Math.round(race * 1.7 + iv * 0.85 + 70) * nature + 100);
+  },
+
+  /** 渲染可点击的种族值项（支持PVP模式） */
   _statItem(petIdx, st, key, label) {
     const selected = this._teamStats[petIdx] || [];
     const isSel = selected.includes(key);
     const val = st[key] ?? '-';
-    const cls = isSel ? 'sd-stat-item sel' : 'sd-stat-item';
-    return '<div class="'+cls+'" onclick="Renderer._toggleStat('+petIdx+',\''+key+'\')"><span class="sd-stat-label">'+label+'</span><span class="sd-stat-val">'+val+'</span></div>';
+    const pvpMode = this._pvpMode;
+    const nature = this._petNature[petIdx];
+
+    // PVP模式计算
+    let displayVal = val;
+    let extra = '';
+    let pvpCls = '';
+    if (pvpMode && nature) {
+      // 从性格名称映射修正倍率
+      const natureMap = {
+        'hp':'hp','attack':'attack','defense':'defense','magic_attack':'magic_attack',
+        'magic_defense':'magic_defense','speed':'speed'
+      };
+      // 性格倍率: +10% 或 -10%
+      let natureMult = 1.0;
+      // 查看本精灵的性格选择，确定哪项+10%哪项-10%
+      // _petNature 存的是选中的属性key (如'speed')
+      if (nature === key) natureMult = 1.1;
+      else {
+        // -10%只影响魔防（天真性格的设定）
+        const natureNeg = {'speed':'magic_defense'};
+        if (natureNeg[nature] === key) natureMult = 0.9;
+      }
+
+      const baseRace = Number(val);
+      if (!isNaN(baseRace)) {
+        // IV基础，选中项可用加点
+        const iv = isSel ? 60 : 0; // 简单起见，选中=60点，未选中=0
+        if (key === 'hp') {
+          displayVal = this._calcPvpHp(baseRace, natureMult, iv);
+        } else {
+          displayVal = this._calcPvpStat(baseRace, natureMult, iv);
+        }
+        pvpCls = 'pvp';
+      }
+      extra = '<span class="sd-stat-pvp">PVP</span>';
+    }
+
+    const cls = isSel ? 'sd-stat-item sel' : 'sd-stat-item' + (pvpCls ? ' '+pvpCls : '');
+    return '<div class="'+cls+'" onclick="Renderer._toggleStat('+petIdx+',\''+key+'\')">'
+      + '<span class="sd-stat-label">'+label+extra+'</span>'
+      + '<span class="sd-stat-val">'+displayVal+'</span></div>';
   },
 
   /** 切换种族值选中（最多3个） */

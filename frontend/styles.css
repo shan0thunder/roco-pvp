@@ -166,8 +166,12 @@ body {
 .sd-stat-item { background: var(--white); border: 1px solid var(--neutral-100); border-radius: 4px; padding: 1px 3px; text-align: center; cursor: pointer; }
 .sd-stat-item:hover { border-color: var(--primary-500); }
 .sd-stat-item.sel { background: #FFF3CD !important; border-color: #F59E0B; }
+.sd-pvp-toggle { writing-mode:vertical-lr; font-size:9px; font-weight:700; cursor:pointer; padding:2px 3px; border-radius:3px; background:var(--neutral-100); color:var(--neutral-500); text-align:center; letter-spacing:0.1em; transition:all 0.15s; user-select:none; }
+.sd-pvp-toggle:hover { background:var(--primary-500); color:#fff; }
 .sd-stat-label { font-size: 8px; color: var(--neutral-400); display: block; }
 .sd-stat-val { font-size: 10px; font-weight: 700; color: var(--primary-600); }
+.sd-stat-item.pvp .sd-stat-val { color: #16a34a; }
+.sd-stat-pvp { font-size:6px; background:var(--accent-500); color:#fff; border-radius:2px; padding:0 3px; margin-left:2px; vertical-align:super; }
 .sd-col-nature { gap: 4px; }
 .sd-nature-select { width: 100%; padding: 4px 6px; border: 1px solid var(--neutral-200); border-radius: var(--radius); font-size: var(--text-xs); outline: none; cursor: pointer; }
 .sd-nature-select:focus { border-color: var(--primary-500); }
