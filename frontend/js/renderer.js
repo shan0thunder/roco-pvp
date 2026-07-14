@@ -25,6 +25,8 @@ const Renderer = {
   _petFilterFunc: '',
   _petFilterLeader: false,
   _petSortBy: null,
+  _petPageSize: 50,
+  _petPage: 1,
   _skillIndex: null,  // 技能索引缓存
 
   // 阵容分享
@@ -488,9 +490,15 @@ const Renderer = {
     }
 
     html += '<div class="page-header"><h2>精灵图鉴</h2><p>点击精灵查看详细信息与技能，点 + 加入队伍，支持右键更多操作</p></div>';
+    // 分页
+    const pageSize = this._petPageSize;
+    const totalPages = Math.ceil(pets.length / pageSize);
+    const currentPage = Math.min(this._petPage || 1, totalPages);
+    const pagedPets = pets.slice(0, currentPage * pageSize);
+
     html += '<div class="card-grid" id="petGrid">';
 
-    for (const p of pets) {
+    for (const p of pagedPets) {
       const elements = (p.element || []).map(e => `<span class="card-tag" style="background:${Utils.elementColor(e)};color:#fff">${Utils.esc(e)}</span>`).join('');
       const isExpanded = this._expandedPet && this._expandedPet.name === p.name && this._expandedPet.idx === DataStore.pets.indexOf(p);
       const img = p.image ? `<img class="card-img" src="${Utils.esc(p.image)}" alt="${Utils.esc(p.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" style="background:${Utils.imgColor(p.name)}"><div class="card-img-fallback" style="display:none;width:100%;height:120px;background:${Utils.imgColor(p.name)};border-radius:8px;align-items:center;justify-content:center;font-size:32px;color:rgba(255,255,255,0.6);font-weight:700">${Utils.esc((p.name||'?')[0])}</div>` : '';
@@ -549,6 +557,13 @@ const Renderer = {
     }
     html += '</div>';
     if (pets.length === 0) html += '<div class="empty-state">未找到匹配的精灵，试试其他关键词</div>';
+
+    // 加载更多
+    if (currentPage < totalPages) {
+      html += '<div style="text-align:center;padding:16px 0">'
+        + '<button class="btn" onclick="Renderer._petPage++;Renderer._renderCurrentView()">加载更多 ('+currentPage+'/'+totalPages+', 每页'+pageSize+'只)</button>'
+        + '</div>';
+    }
 
     this._container.innerHTML = html;
 
