@@ -11,35 +11,53 @@ const DataStore = {
   _data: null,
   _loaded: false,
   _loadPromise: null,
+  _cacheKey: 'pvp_data_cache',
+  _cacheTime: 3600000, // 1小时缓存有效
 
   async load() {
     if (this._data) return this._data;
     if (this._loadPromise) return this._loadPromise;
+
+    // 尝试从 localStorage 读取缓存
+    try {
+      const cached = localStorage.getItem(this._cacheKey);
+      if (cached) {
+        const { data, time } = JSON.parse(cached);
+        if (Date.now() - time < this._cacheTime) {
+          this._data = data;
+          console.log('📦 使用缓存数据');
+          return data;
+        }
+      }
+    } catch (_) {}
+
     this._loadPromise = this._doLoad();
     return this._loadPromise;
   },
   async _doLoad() {
-    // 兼容本地开发 (frontend/) 和 GitHub Pages (root)
-    const paths = [];
-    const isLocal = window.location.pathname.includes('/frontend/');
-    if (isLocal) {
-      paths.push('../data/product/product_data.json');
-    }
-    paths.push('data/product/product_data.json');
+    const dataUrl = window.location.pathname.includes('/frontend/')
+      ? '../data/product/product_data.json'
+      : 'data/product/product_data.json';
 
-    for (const path of paths) {
+    try {
+      const resp = await fetch(dataUrl);
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      this._data = await resp.json();
+
+      // 缓存到 localStorage
       try {
-        const resp = await fetch(path);
-        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-        this._data = await resp.json();
-        return this._data;
-      } catch (e) {
-        console.warn(path + ' 加载失败', e);
-      }
-    }
+        localStorage.setItem(this._cacheKey, JSON.stringify({
+          data: this._data,
+          time: Date.now()
+        }));
+      } catch (_) {}
 
-    this._loadPromise = null;
-    throw new Error('HTTP 404');
+      return this._data;
+    } catch (e) {
+      console.warn('数据加载失败', e);
+      this._loadPromise = null;
+      throw e;
+    }
   },
 
   /** 异步加载技能索引 */
@@ -205,6 +223,13 @@ const Utils = {
   truncate(str, maxLen) {
     if (!str) return '';
     return str.length > maxLen ? str.slice(0, maxLen) + '…' : str;
+  },
+
+  /** 图片加载失败时的占位色（基于名字生成稳定色） */
+  imgColor(name) {
+    let h = 0;
+    for (let i = 0; i < (name||'').length; i++) h = (h * 31 + name.charCodeAt(i)) & 0xffff;
+    return 'hsl(' + (h % 360) + ', 25%, 60%)';
   },
 
   /** 根据技能属性返回颜色（BiliWiki 官方色值） */

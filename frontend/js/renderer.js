@@ -493,7 +493,7 @@ const Renderer = {
     for (const p of pets) {
       const elements = (p.element || []).map(e => `<span class="card-tag" style="background:${Utils.elementColor(e)};color:#fff">${Utils.esc(e)}</span>`).join('');
       const isExpanded = this._expandedPet && this._expandedPet.name === p.name && this._expandedPet.idx === DataStore.pets.indexOf(p);
-      const img = p.image ? `<img class="card-img" src="${Utils.esc(p.image)}" alt="${Utils.esc(p.name)}" loading="lazy">` : '';
+      const img = p.image ? `<img class="card-img" src="${Utils.esc(p.image)}" alt="${Utils.esc(p.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" style="background:${Utils.imgColor(p.name)}"><div class="card-img-fallback" style="display:none;width:100%;height:120px;background:${Utils.imgColor(p.name)};border-radius:8px;align-items:center;justify-content:center;font-size:32px;color:rgba(255,255,255,0.6);font-weight:700">${Utils.esc((p.name||'?')[0])}</div>` : '';
 
       if (isExpanded) {
         const st = p.stats || {};
