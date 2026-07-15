@@ -711,7 +711,22 @@ const Renderer = {
     if (elem) filtered = filtered.filter(s => (s.element||'') === elem);
     if (cat) filtered = filtered.filter(s => (s.category||'') === cat);
     if (cost !== null && cost !== undefined && cost !== '') filtered = filtered.filter(s => s.cost === Number(cost));
-    if (func) filtered = filtered.filter(s => ((s.effect||'')+(s.name||'')).includes(func));
+    if (func) {
+      // 功能筛选逻辑（与精灵图鉴一致）
+      const funcKeywords = {
+        '清强化': ['驱散','清除强化','清强化'],
+        '印记': ['印记','标记'],
+        '清印记': ['清除','驱散','清印记'],
+        '回血': ['回复','治疗','回血','吸血'],
+        '护盾': ['护盾','减伤','屏障'],
+        '先手': ['先手','抢先'],
+      };
+      const keywords = funcKeywords[func] || [func];
+      filtered = filtered.filter(s => {
+        const text = (s.effect||'')+(s.name||'');
+        return keywords.some(kw => text.includes(kw));
+      });
+    }
     if (kw) filtered = filtered.filter(s => s.name.includes(kw) || (s.effect||'').includes(kw));
     if (sortBy === 'power_desc') filtered.sort((a,b) => (b.power||0)-(a.power||0));
     if (sortBy === 'power_asc') filtered.sort((a,b) => (a.power||0)-(b.power||0));
