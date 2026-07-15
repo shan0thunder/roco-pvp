@@ -412,10 +412,26 @@ const Renderer = {
         + '<div class="sd-col sd-col-nature">'
         + '<div class="sd-col-title">性格'+ (this._pvpMode?' <span style="font-size:8px;color:var(--accent-500)">PVP</span>':'') + '</div>'
         + '<select class="sd-nature-select" onchange="Renderer._petNature['+petIdx+']=this.value;Renderer._renderCurrentView()">'
-        + '<option value="">选择</option>';
-      const STAT_NAMES = {hp:'生命',attack:'物攻',defense:'物防',magic_attack:'魔攻',magic_defense:'魔防',speed:'速度'};
-      for (const [key, label] of Object.entries(STAT_NAMES)) {
-        html += '<option value="'+key+'"'+(currentNature===key?' selected':'')+'>'+label+' ('+(st[key]??'-')+')</option>';
+        + '<option value="">性格选择</option>';
+      const NATURE_LIST = [
+        {n:'勇敢', up:'attack', down:'speed'},
+        {n:'开朗', up:'speed', down:'magic_attack'},
+        {n:'固执', up:'attack', down:'magic_attack'},
+        {n:'保守', up:'magic_attack', down:'attack'},
+        {n:'胆小', up:'speed', down:'attack'},
+        {n:'沉着', up:'magic_defense', down:'attack'},
+        {n:'大胆', up:'defense', down:'attack'},
+        {n:'温和', up:'magic_defense', down:'defense'},
+        {n:'慎重', up:'magic_defense', down:'magic_attack'},
+        {n:'淘气', up:'defense', down:'magic_attack'},
+        {n:'冷静', up:'magic_attack', down:'speed'},
+        {n:'悠闲', up:'defense', down:'speed'},
+        {n:'狂妄', up:'magic_attack', down:'magic_defense'},
+        {n:'寂寞', up:'attack', down:'defense'},
+        {n:'天真', up:'speed', down:'magic_defense'},
+      ];
+      for (const {n, up, down} of NATURE_LIST) {
+        html += '<option value="'+up+':'+down+'"'+(currentNature===up+':'+down?' selected':'')+'>'+n+'</option>';
       }
       html += '</select>'
         + (sp.trait ? '<div class="sd-col-desc" style="font-size:11px;color:var(--neutral-500);line-height:1.5;padding:6px 4px;border-top:1px solid var(--neutral-100);margin-top:6px"><strong>'+Utils.esc(sp.trait.name)+'</strong><br>'+Utils.esc(sp.trait.desc)+'</div>' : '')
@@ -1381,12 +1397,13 @@ const Renderer = {
     let displayVal = val;
     let cls = isSel ? 'sd-stat-item sel' : 'sd-stat-item';
     if (pvpMode && nature) {
+      // nature 格式为 "up:down" 如 "speed:magic_defense"
+      const parts = nature.split(':');
+      const upStat = parts[0];
+      const downStat = parts[1] || '';
       let natureMult = 1.0;
-      if (nature === key) natureMult = 1.1;
-      else {
-        const natureNeg = {'speed':'magic_defense','attack':'magic_attack','magic_attack':'attack','defense':'magic_defense','magic_defense':'defense','hp':'defense'};
-        if (natureNeg[nature] === key) natureMult = 0.9;
-      }
+      if (upStat === key) natureMult = 1.1;
+      else if (downStat === key) natureMult = 0.9;
       const baseRace = Number(val);
       if (!isNaN(baseRace)) {
         const iv = isSel ? 60 : 0;
