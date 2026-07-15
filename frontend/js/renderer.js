@@ -413,21 +413,38 @@ const Renderer = {
         + '<div class="sd-col-title">性格'+ (this._pvpMode?' <span style="font-size:8px;color:var(--accent-500)">PVP</span>':'') + '</div>'
         + '<select class="sd-nature-select" onchange="Renderer._petNature['+petIdx+']=this.value;Renderer._renderCurrentView()">'
         + '<option value="">性格选择</option>';
-      // 性格数据来源于BiliWiki: https://wiki.biligame.com/rocom/性格
+      // 性格数据（30种配对）来源: BiliWiki
       const NATURE_LIST = [
         {n:'大胆', up:'attack', down:'defense'},
         {n:'固执', up:'attack', down:'magic_attack'},
+        {n:'好斗', up:'attack', down:'magic_defense'},
         {n:'勇敢', up:'attack', down:'speed'},
+        {n:'好强', up:'attack', down:'hp'},
+        {n:'莽撞', up:'defense', down:'attack'},
         {n:'天真', up:'defense', down:'magic_attack'},
+        {n:'瞌睡', up:'defense', down:'magic_defense'},
         {n:'悠闲', up:'defense', down:'speed'},
         {n:'坦率', up:'defense', down:'hp'},
+        {n:'刻板', up:'magic_attack', down:'attack'},
         {n:'专注', up:'magic_attack', down:'defense'},
+        {n:'马虎', up:'magic_attack', down:'magic_defense'},
         {n:'冷静', up:'magic_attack', down:'speed'},
+        {n:'偏执', up:'magic_attack', down:'hp'},
+        {n:'浮躁', up:'magic_defense', down:'attack'},
+        {n:'温顺', up:'magic_defense', down:'defense'},
         {n:'害羞', up:'magic_defense', down:'magic_attack'},
         {n:'慎重', up:'magic_defense', down:'speed'},
+        {n:'勤奋', up:'magic_defense', down:'hp'},
         {n:'胆小', up:'speed', down:'attack'},
+        {n:'急躁', up:'speed', down:'defense'},
         {n:'开朗', up:'speed', down:'magic_attack'},
+        {n:'活泼', up:'speed', down:'magic_defense'},
+        {n:'急噪', up:'speed', down:'hp'},
+        {n:'孤僻', up:'hp', down:'attack'},
+        {n:'冷淡', up:'hp', down:'defense'},
         {n:'平和', up:'hp', down:'magic_attack'},
+        {n:'消沉', up:'hp', down:'magic_defense'},
+        {n:'无虑', up:'hp', down:'speed'},
       ];
       for (const {n, up, down} of NATURE_LIST) {
         html += '<option value="'+up+':'+down+'"'+(currentNature===up+':'+down?' selected':'')+'>'+n+'</option>';
