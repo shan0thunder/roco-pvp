@@ -1282,6 +1282,74 @@ const Renderer = {
     this._renderCurrentView();
   },
 
+  /** 阵容智能分析 */
+  _analyzeTeam(entry, pets) {
+    const chart = DataStore.typeChart || {};
+    const allElems = DataStore.elements || [];
+    const analysis = { style: [], synergy: [], weakness: [], info: [] };
+
+    if (!pets.length || !entry) return analysis;
+
+    const teamElems = [...new Set(pets.flatMap(p => p.element||[]))];
+    const avgSpeed = pets.reduce((s,p) => s+(p.stats?.speed||0),0)/pets.length;
+    const avgDef = pets.reduce((s,p) => s+(p.stats?.defense||0)+(p.stats?.magic_defense||0),0)/pets.length/2;
+    const hasHeal = pets.some(p => (p.trait?.desc||'').includes('回复') || p.trait?.name?.includes('吸'));
+    const hasWeather = pets.some(p => (p.skills||[]).some(s => ['落雨','沙涌','冬至','烈日'].includes(s.name)));
+
+    // 战术类型
+    if (avgSpeed > 100) analysis.style.push('⚡ 高速压制 — 平均速度'+Math.round(avgSpeed)+'，抢先手能力强');
+    else if (avgSpeed < 75) analysis.style.push('🛡 低速阵地 — 平均速度'+Math.round(avgSpeed)+'，擅长后手反击');
+    else analysis.style.push('⚖️ 均衡节奏 — 平均速度'+Math.round(avgSpeed)+'，容错率较高');
+
+    if (hasWeather) analysis.style.push('🌤 天气体系 — 拥有天气技能，可围绕天气构筑战术');
+    if (hasHeal) analysis.style.push('💚 续航充沛 — 拥有回复特性，持续作战能力强');
+    if (avgDef > 120) analysis.style.push('🔰 铁壁防守 — 平均双防'+Math.round(avgDef)+'，不易被击穿');
+
+    // 属性配合与克制
+    const strong = [], weak = [];
+    for (const atk of allElems) {
+      let countSuper = 0, countResist = 0;
+      for (const p of pets) {
+        const eff = this._calcEffectiveness(atk, p);
+        if (eff > 1.0) countSuper++;
+        if (eff < 1.0 && eff > 0) countResist++;
+      }
+      if (countSuper >= 3) strong.push(atk);
+      if (countSuper >= 3 && countResist === 0) weak.push(atk);
+    }
+    if (strong.length) analysis.synergy.push('🎯 属性联动 — '+strong.join('/')+'攻击可压制对方3只以上');
+
+    // 高威胁属性（克制队伍2只以上）
+    const threats = [];
+    for (const atk of allElems) {
+      let count = 0;
+      for (const p of pets) {
+        if (this._calcEffectiveness(atk, p) > 1.0) count++;
+      }
+      if (count >= 2) threats.push(atk);
+    }
+    if (threats.length) analysis.weakness.push('⚠️ 高威胁 — '+threats.join('/')+'可克制你2只以上精灵');
+
+    // 属性重叠（多个同属性精灵）
+    const elemCounts = {};
+    for (const p of pets) for (const e of (p.element||[])) elemCounts[e] = (elemCounts[e]||0)+1;
+    const dups = Object.entries(elemCounts).filter(([_,c]) => c >= 2);
+    if (dups.length) analysis.weakness.push('🔁 属性重叠 — '+dups.map(([e,c])=>e+'×'+c).join(', ')+'，容易被针对');
+
+    // 信息差：非主流精灵
+    const allTeamNames = new Set(DataStore.teams.flatMap(t => [...(t.core_pets||[]), ...(t.flex_pets||[])]));
+    const offMeta = pets.filter(p => !allTeamNames.has(p.name)).map(p => p.name);
+    if (offMeta.length) analysis.info.push('🌟 信息差 — '+offMeta.slice(0,3).join(', ')+(offMeta.length>3?'等':'')+'并非主流阵容常见选择，对手可能缺乏应对经验');
+
+    // 特性配合
+    const traits = pets.map(p => p.trait?.name).filter(Boolean);
+    const uniqueTraits = [...new Set(traits)];
+    if (uniqueTraits.length >= 4) analysis.synergy.push('🧬 特性多样 — '+uniqueTraits.length+'种不同特性，战术丰富');
+    if (uniqueTraits.length <= 2 && uniqueTraits.length > 0) analysis.synergy.push('🎯 特性专精 — 队伍特性集中，配合默契度高');
+
+    return analysis;
+  },
+
   /** 显示分享阵容详情弹窗 */
   async _showSharedTeamDetail(id) {
     const teams = await this._getSharedTeams('created_at');
@@ -1301,6 +1369,9 @@ const Renderer = {
     div.className = 'share-detail-overlay';
     div.onclick = function(e) { if (e.target === this) this.remove(); };
 
+    // 智能分析
+    const analysis = this._analyzeTeam(entry, pets);
+
     let inner = '<div class="share-detail-panel">'
       + '<button class="share-detail-close" onclick="this.closest(\'.share-detail-overlay\').remove()">×</button>'
       + '<h3>分享阵容详情</h3>';
@@ -1316,6 +1387,18 @@ const Renderer = {
     inner += '<div style="font-size:12px;color:var(--neutral-500);margin:8px 0">'
       + '打击面 '+coverPct+'% ｜ 抵抗面 '+resistPct+'% ｜ 👁 '+(entry.click_count||0)+' 次查看</div>'
       + '<div style="font-size:10px;color:var(--neutral-500);font-weight:600;text-align:right;margin-top:-4px">ID: '+entry.id+'</div>';
+
+    // 智能分析展示
+    const allAnalysis = [...analysis.style, ...analysis.synergy, ...analysis.weakness, ...analysis.info];
+    if (allAnalysis.length) {
+      inner += '<div style="margin:8px 0;padding:8px;background:var(--neutral-50);border-radius:8px;font-size:12px;line-height:1.8">'
+        + '<div style="font-size:10px;font-weight:700;color:var(--neutral-400);margin-bottom:4px;letter-spacing:0.05em">📊 阵容分析</div>';
+      for (const a of allAnalysis) {
+        const icon = analysis.style.includes(a) ? '' : analysis.synergy.includes(a) ? '' : analysis.weakness.includes(a) ? '' : '';
+        inner += '<div style="display:flex;gap:4px;align-items:flex-start"><span>'+a+'</span></div>';
+      }
+      inner += '</div>';
+    }
 
     inner += '<div class="share-detail-pets">';
     for (let i = 0; i < (entry.pet_names||[]).length; i++) {
