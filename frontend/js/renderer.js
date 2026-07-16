@@ -825,7 +825,7 @@ const Renderer = {
         + '<td>'+(s.power!=null?s.power:'-')+'</td>'
         + '<td class="skill-effect" style="max-width:300px">'+Utils.esc((s.effect||'').slice(0,60))+' <span style="font-size:10px;color:var(--neutral-300)">'+(isExpanded?'▲':'▼')+'</span></td>'
         + '<td style="font-size:12px;color:var(--neutral-500)">'+petNames+'<span style="color:var(--primary-500)">'+more+'</span></td>'
-        + '<td style="font-size:11px;color:var(--neutral-400);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+Utils.esc(stoneMap[s.name]||'')+'">'+Utils.esc(stoneMap[s.name]||'—')+'</td>'
+        + '<td style="font-size:11px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+Utils.esc(stoneMap[s.name]||'')+'">'+(stoneMap[s.name] ? this._linkPetsInText(stoneMap[s.name]) : '—')+'</td>'
         + '</tr>'
         + (isExpanded ? '<tr class="skill-pets-row"><td colspan="8"><div style="display:flex;flex-wrap:wrap;gap:4px;padding:8px;background:var(--neutral-50)">'+(petsWith.length ? petsWith.map(pn => '<span class="skill-pet-link" onclick="event.stopPropagation();Router.go(\'pet\',\''+Utils.esc(pn)+'\');Renderer._renderCurrentView()" style="padding:2px 8px;border-radius:4px;border:1px solid var(--neutral-200);cursor:pointer;font-size:12px">'+Utils.esc(pn)+'</span>').join('') : '<span style="font-size:12px;color:var(--neutral-500)">暂无</span>')+'</div></td></tr>' : '');
     }
@@ -1958,6 +1958,22 @@ const Renderer = {
         }
       });
     }, 400);
+  },
+
+  /** 将文本中的精灵名转为可点击链接 */
+  _linkPetsInText(text) {
+    if (!text) return '';
+    // 找所有可能出现在文本中的精灵名
+    const petNames = DataStore.pets.map(p => p.name).sort((a,b) => b.length - a.length);
+    let result = Utils.esc(text);
+    for (const name of petNames) {
+      const escaped = Utils.esc(name);
+      if (result.includes(escaped) && name.length >= 2) {
+        result = result.split(escaped).join('<span style="color:var(--primary-500);cursor:pointer" onclick="event.stopPropagation();Router.go(\'pet\',\''+Utils.esc(name)+'\');Renderer._renderCurrentView()">'+escaped+'</span>');
+        break;
+      }
+    }
+    return result;
   },
 
   /** 搜索联想词 */
