@@ -753,6 +753,7 @@ const Renderer = {
         '护盾': ['护盾','减伤','屏障'],
         '先手': ['先手','抢先'],
         '天气': ['天气','雨天','沙暴','暴风雪','落雨','沙涌','冬至'],
+        '选择': ['选择'],
       };
       const keywords = funcKeywords[func] || [func];
       filtered = filtered.filter(s => {
@@ -794,6 +795,7 @@ const Renderer = {
       + '<option value="护盾"'+(func==='护盾'?' selected':'')+'>护盾</option>'
       + '<option value="先手"'+(func==='先手'?' selected':'')+'>先手</option>'
       + '<option value="天气"'+(func==='天气'?' selected':'')+'>天气</option>'
+      + '<option value="选择"'+(func==='选择'?' selected':'')+'>选择</option>'
       + '</select>'
       + '<select class="filter-select" onchange="Renderer._skillSortBy=this.value;Renderer._renderCurrentView()"><option value="">排序</option>'
       + '<option value="power_desc"'+(sortBy==='power_desc'?' selected':'')+'>威力⬇</option>'
