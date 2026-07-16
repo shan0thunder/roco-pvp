@@ -12,7 +12,7 @@ const DataStore = {
   _loaded: false,
   _loadPromise: null,
   _cacheKey: 'pvp_data_cache',
-  _cacheTime: 3600000, // 1小时缓存有效
+  _cacheTime: 86400000, // 24小时缓存有效
 
   async load() {
     if (this._data) return this._data;
