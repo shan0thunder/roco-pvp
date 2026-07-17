@@ -157,7 +157,7 @@ body {
 .sd-col-title { font-size: 9px; font-weight: 700; color: var(--neutral-400); margin-bottom: 4px; letter-spacing: 0.06em; text-transform: uppercase; border-bottom: 1px solid var(--neutral-100); padding-bottom: 3px; flex-shrink: 0; }
 .sd-col-pet { align-items: center; text-align: center; gap: 4px; }
 .sd-pet-img-wrap { flex-shrink: 0; }
-.sd-pet-img { width: 72px; height: 72px; object-fit: contain; background: var(--neutral-50); border-radius: var(--radius); }
+.sd-pet-img { width: 72px; height: 72px; object-fit: contain; background: #fff; border-radius: var(--radius); }
 .sd-pet-name { font-weight: 700; font-size: var(--text-sm); color: var(--neutral-900); flex-shrink: 0; }
 .sd-pet-elems { flex-shrink: 0; }
 .sd-pet-elems .card-tag { font-size: 9px; padding: 1px 5px; }

@@ -410,44 +410,21 @@ const Renderer = {
         + this._statItem(petIdx, st, 'speed', '速')
         + '</div></div></div>'
         + '<div class="sd-col sd-col-nature">'
-        + '<div class="sd-col-title">性格'+ (this._pvpMode?' <span style="font-size:8px;color:var(--accent-500)">PVP</span>':'') + '</div>'
-        + '<select class="sd-nature-select" onchange="Renderer._petNature['+petIdx+']=this.value;Renderer._renderCurrentView()">'
-        + '<option value="">性格选择</option>';
-      // 性格数据（30种配对）来源: BiliWiki
-      const NATURE_LIST = [
-        {n:'大胆', up:'attack', down:'defense'},
-        {n:'固执', up:'attack', down:'magic_attack'},
-        {n:'好斗', up:'attack', down:'magic_defense'},
-        {n:'勇敢', up:'attack', down:'speed'},
-        {n:'好强', up:'attack', down:'hp'},
-        {n:'莽撞', up:'defense', down:'attack'},
-        {n:'天真', up:'defense', down:'magic_attack'},
-        {n:'瞌睡', up:'defense', down:'magic_defense'},
-        {n:'悠闲', up:'defense', down:'speed'},
-        {n:'坦率', up:'defense', down:'hp'},
-        {n:'刻板', up:'magic_attack', down:'attack'},
-        {n:'专注', up:'magic_attack', down:'defense'},
-        {n:'马虎', up:'magic_attack', down:'magic_defense'},
-        {n:'冷静', up:'magic_attack', down:'speed'},
-        {n:'偏执', up:'magic_attack', down:'hp'},
-        {n:'浮躁', up:'magic_defense', down:'attack'},
-        {n:'温顺', up:'magic_defense', down:'defense'},
-        {n:'害羞', up:'magic_defense', down:'magic_attack'},
-        {n:'慎重', up:'magic_defense', down:'speed'},
-        {n:'勤奋', up:'magic_defense', down:'hp'},
-        {n:'胆小', up:'speed', down:'attack'},
-        {n:'急躁', up:'speed', down:'defense'},
-        {n:'开朗', up:'speed', down:'magic_attack'},
-        {n:'活泼', up:'speed', down:'magic_defense'},
-        {n:'急噪', up:'speed', down:'hp'},
-        {n:'孤僻', up:'hp', down:'attack'},
-        {n:'冷淡', up:'hp', down:'defense'},
-        {n:'平和', up:'hp', down:'magic_attack'},
-        {n:'消沉', up:'hp', down:'magic_defense'},
-        {n:'无虑', up:'hp', down:'speed'},
-      ];
-      for (const {n, up, down} of NATURE_LIST) {
-        html += '<option value="'+up+':'+down+'"'+(currentNature===up+':'+down?' selected':'')+'>'+n+'</option>';
+        + '<div class="sd-col-title">性格'+ (this._pvpMode?' <span style="font-size:8px;color:var(--accent-500)">PVP</span>':'') + '</div>';
+      const curUp = currentNature ? currentNature.split(':')[0] : '';
+      const curDown = currentNature ? currentNature.split(':')[1] : '';
+      const STAT_KEYS = ['hp','attack','defense','magic_attack','magic_defense','speed'];
+      const STAT_LABELS = {hp:'生命',attack:'物攻',defense:'物防',magic_attack:'魔攻',magic_defense:'魔防',speed:'速度'};
+      html += '<select class="sd-nature-select" style="margin-bottom:2px" onchange="Renderer._setNatureUp('+petIdx+',this.value)">'
+        + '<option value="">+ 增加</option>';
+      for (const k of STAT_KEYS) {
+        html += '<option value="'+k+'"'+(curUp===k?' selected':'')+'>'+STAT_LABELS[k]+'</option>';
+      }
+      html += '</select>'
+        + '<select class="sd-nature-select" onchange="Renderer._setNatureDown('+petIdx+',this.value)">'
+        + '<option value="">− 削弱</option>';
+      for (const k of STAT_KEYS) {
+        html += '<option value="'+k+'"'+(curDown===k?' selected':'')+'>'+STAT_LABELS[k]+'</option>';
       }
       html += '</select>'
         + (sp.trait ? '<div class="sd-col-desc" style="font-size:11px;color:var(--neutral-500);line-height:1.5;padding:6px 4px;border-top:1px solid var(--neutral-100);margin-top:6px"><strong>'+Utils.esc(sp.trait.name)+'</strong><br>'+Utils.esc(sp.trait.desc)+'</div>' : '')
@@ -594,10 +571,14 @@ const Renderer = {
     html += '</div>';
     if (pets.length === 0) html += '<div class="empty-state">未找到匹配的精灵，试试其他关键词</div>';
 
-    // 加载更多
-    if (currentPage < totalPages) {
-      html += '<div style="text-align:center;padding:16px 0">'
-        + '<button class="btn" onclick="Renderer._petPage++;Renderer._renderCurrentView()">加载更多 ('+currentPage+'/'+totalPages+', 每页'+pageSize+'只)</button>'
+    // 翻页导航
+    if (totalPages > 1) {
+      html += '<div style="display:flex;align-items:center;justify-content:center;gap:6px;padding:16px 0;flex-wrap:wrap">'
+        + '<button class="btn-sm"'+(currentPage<=1?' disabled style="opacity:0.4"':'')+' onclick="Renderer._petPage=1;Renderer._renderCurrentView()">首页</button>'
+        + '<button class="btn-sm"'+(currentPage<=1?' disabled style="opacity:0.4"':'')+' onclick="Renderer._petPage=Math.max(1,'+(currentPage-1)+');Renderer._renderCurrentView()">‹</button>'
+        + '<span style="font-size:13px;color:var(--neutral-500);padding:0 8px">'+currentPage+' / '+totalPages+'</span>'
+        + '<button class="btn-sm"'+(currentPage>=totalPages?' disabled style="opacity:0.4"':'')+' onclick="Renderer._petPage=Math.min('+totalPages+','+(currentPage+1)+');Renderer._renderCurrentView()">›</button>'
+        + '<button class="btn-sm"'+(currentPage>=totalPages?' disabled style="opacity:0.4"':'')+' onclick="Renderer._petPage='+totalPages+';Renderer._renderCurrentView()">尾页</button>'
         + '</div>';
     }
 
@@ -1435,6 +1416,21 @@ const Renderer = {
     return '<div class="'+cls+'" onclick="Renderer._toggleStat('+petIdx+',\''+key+'\')">'
       + '<span class="sd-stat-label">'+label+'</span>'
       + '<span class="sd-stat-val">'+displayVal+'</span></div>';
+  },
+
+  /** 性格：设置增加项 */
+  _setNatureUp(petIdx, value) {
+    const cur = this._petNature[petIdx] || ':';
+    const parts = cur.split(':');
+    this._petNature[petIdx] = value + ':' + (parts[1]||'');
+    this._renderCurrentView();
+  },
+  /** 性格：设置削弱项 */
+  _setNatureDown(petIdx, value) {
+    const cur = this._petNature[petIdx] || ':';
+    const parts = cur.split(':');
+    this._petNature[petIdx] = (parts[0]||'') + ':' + value;
+    this._renderCurrentView();
   },
 
   /** 切换种族值选中（最多3个） */
