@@ -1567,7 +1567,8 @@ const Renderer = {
     const div = document.createElement('div');
     div.id = 'shareDialog';
     div.className = 'share-dialog-overlay';
-    div.innerHTML = '<div class="share-card-dialog">'
+    div.innerHTML = '<div class="share-card-dialog" style="position:relative">'
+      + '<span class="share-dialog-close" onclick="this.parentElement.remove()">✕</span>'
       + '<div class="share-card-section">'
       + '<input id="shareTeamName" class="share-name-input" placeholder="队伍名（选填，最多15字）" maxlength="15" value="'+Utils.esc(savedName)+'">'
       + '</div>'
