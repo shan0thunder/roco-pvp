@@ -507,7 +507,7 @@ const Renderer = {
     const pageSize = this._petPageSize;
     const totalPages = Math.ceil(pets.length / pageSize);
     const currentPage = Math.min(this._petPage || 1, totalPages);
-    const pagedPets = pets.slice(0, currentPage * pageSize);
+    const pagedPets = pets.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
     html += '<div class="card-grid" id="petGrid">';
 
