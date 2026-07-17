@@ -584,6 +584,23 @@ const Renderer = {
 
     this._container.innerHTML = html;
 
+    // 回到顶部按钮
+    const topBtn = document.getElementById('backToTop');
+    if (!topBtn && this._team.length > 0) {
+      const btn = document.createElement('div');
+      btn.id = 'backToTop';
+      btn.innerHTML = '↑';
+      btn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.body.appendChild(btn);
+      // 监听滚动显示/隐藏
+      window.addEventListener('scroll', function st() {
+        const b = document.getElementById('backToTop');
+        if (b) b.style.display = window.scrollY > 300 ? 'flex' : 'none';
+      });
+    } else if (topBtn) {
+      topBtn.style.display = this._team.length > 0 ? 'flex' : 'none';
+    }
+
     // 配队器可拖拽（仅手机端）
     if (window.innerWidth < 768) {
       const builder = this._container.querySelector('.builder-bar');
